@@ -25,5 +25,5 @@ import org.apache.beam.sdk.transforms.PTransform;
  * Describe a {@link PTransform} evaluator.
  */
 public interface TransformEvaluator<TransformT extends PTransform<?, ?>> extends Serializable {
-  void evaluate(TransformT transform, EvaluationContext context);
+  void evaluate(TransformT transform, EvaluationContext context, boolean cacheHint);
 }
