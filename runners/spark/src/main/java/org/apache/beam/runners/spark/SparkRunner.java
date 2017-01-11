@@ -258,10 +258,6 @@ public final class SparkRunner extends PipelineRunner<SparkPipelineResult> {
           if (cacheCandidates.get(value) != null) {
             count = cacheCandidates.get(value) + 1;
           }
-          if (value.getName().equals("Write/WriteBundles.out")) {
-            // hack forcing caching for WriteBundles
-            count = 2L;
-          }
           cacheCandidates.put(((PCollection) value), count);
         }
       }
