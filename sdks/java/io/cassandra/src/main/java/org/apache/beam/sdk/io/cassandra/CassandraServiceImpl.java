@@ -320,4 +320,50 @@ public class CassandraServiceImpl<T> implements CassandraService<T> {
       this.rangeEnd = rangeEnd;
     }
   }
+
+  /**
+   * Writer storing an entity into Apache Cassandra database.
+   */
+  protected class WriterImpl<T> implements Writer<T> {
+
+    private final CassandraIO.Write<T> spec;
+
+    private Cluster cluster;
+    private Session session;
+    private MappingManager mappingManager;
+
+    public WriterImpl(CassandraIO.Write<T> spec) {
+      this.spec = spec;
+    }
+
+    @Override
+    public void start() {
+      cluster = getCluster(spec.hosts(), spec.port());
+      session = cluster.connect(spec.keyspace());
+      mappingManager = new MappingManager(session);
+    }
+
+    @Override
+    public void write(T entity) {
+      Mapper<T> mapper = (Mapper<T>) mappingManager.mapper(entity.getClass());
+      mapper.save(entity);
+    }
+
+    @Override
+    public void close() {
+      if (session != null) {
+        session.close();
+      }
+      if (cluster != null) {
+        cluster.close();
+      }
+    }
+
+  }
+
+  @Override
+  public Writer createWriter(CassandraIO.Write<T> spec) {
+    return new WriterImpl(spec);
+  }
+
 }

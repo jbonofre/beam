@@ -45,4 +45,22 @@ public interface CassandraService<T> extends Serializable {
   List<BoundedSource<T>> split(CassandraIO.Read<T> spec,
                                           long desiredBundleSizeBytes);
 
+  /**
+   * Create a {@link Writer} that writes entities into the Cassandra instance.
+   */
+  Writer createWriter(CassandraIO.Write<T> spec) throws Exception;
+
+  /**
+   * Writer for an entity.
+   */
+  interface Writer<T> {
+
+    void start();
+
+    void write(T entity);
+
+    void close();
+
+  }
+
 }
