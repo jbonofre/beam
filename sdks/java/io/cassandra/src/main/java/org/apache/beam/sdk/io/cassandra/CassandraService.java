@@ -53,13 +53,9 @@ public interface CassandraService<T> extends Serializable {
   /**
    * Writer for an entity.
    */
-  interface Writer<T> {
-
-    void start();
+  interface Writer<T> extends AutoCloseable {
 
     void write(T entity);
-
-    void close();
 
   }
 

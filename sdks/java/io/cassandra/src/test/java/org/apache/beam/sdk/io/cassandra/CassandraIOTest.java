@@ -131,8 +131,8 @@ public class CassandraIOTest implements Serializable {
             .withEntity(Scientist.class));
     pipeline.run();
 
-    assertEquals(FakeCassandraService.TABLE.size(), 1000);
-    for (Scientist scientist : FakeCassandraService.TABLE.values()) {
+    assertEquals(service.getTable().size(), 1000);
+    for (Scientist scientist : service.getTable().values()) {
       assertTrue(scientist.name.matches("Name (\\d*)"));
     }
   }
@@ -142,10 +142,10 @@ public class CassandraIOTest implements Serializable {
    */
   private static class FakeCassandraService implements CassandraService<Scientist> {
 
-    public static final Map<Integer, Scientist> TABLE = new ConcurrentHashMap<>();
+    private static final Map<Integer, Scientist> table = new ConcurrentHashMap<>();
 
     public void load() {
-      TABLE.clear();
+      table.clear();
       String[] scientists = {
           "Lovelace",
           "Franklin",
@@ -163,8 +163,12 @@ public class CassandraIOTest implements Serializable {
         Scientist scientist = new Scientist();
         scientist.id = i;
         scientist.name = scientists[index];
-        TABLE.put(scientist.id, scientist);
+        table.put(scientist.id, scientist);
       }
+    }
+
+    public Map<Integer, Scientist> getTable() {
+      return table;
     }
 
     @Override
@@ -185,7 +189,7 @@ public class CassandraIOTest implements Serializable {
 
       @Override
       public boolean start() throws IOException {
-        iterator = TABLE.values().iterator();
+        iterator = table.values().iterator();
         return advance();
       }
 
@@ -223,7 +227,7 @@ public class CassandraIOTest implements Serializable {
     @Override
     public long getEstimatedSizeBytes(CassandraIO.Read spec) {
       long size = 0L;
-      for (Scientist scientist : TABLE.values()) {
+      for (Scientist scientist : table.values()) {
         size = size + scientist.toString().getBytes().length;
       }
       return size;
@@ -240,13 +244,8 @@ public class CassandraIOTest implements Serializable {
     static class FakeCassandraWriter implements Writer<Scientist> {
 
       @Override
-      public void start() {
-        // nothing to do
-      }
-
-      @Override
       public void write(Scientist scientist) {
-        TABLE.put(scientist.id, scientist);
+        table.put(scientist.id, scientist);
       }
 
       @Override

@@ -32,7 +32,6 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.transforms.display.DisplayData;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
@@ -112,6 +111,9 @@ public class CassandraIO {
     @Nullable abstract CassandraService<T> cassandraService();
     abstract Builder<T> builder();
 
+    /**
+     * Specify the hosts of the Apache Cassandra instances.
+     */
     public Read<T> withHosts(List<String> hosts) {
       checkArgument(hosts != null, "CassandraIO.read().withHosts(hosts) called with null hosts");
       checkArgument(hosts.isEmpty(), "CassandraIO.read().withHosts(hosts) called with empty "
@@ -119,34 +121,55 @@ public class CassandraIO {
       return builder().setHosts(hosts).build();
     }
 
+    /**
+     * Specify the port number of the Apache Cassandra instances.
+     */
     public Read<T> withPort(int port) {
       checkArgument(port > 0, "CassandraIO.read().withPort(port) called with invalid port "
           + "number (%d)", port);
       return builder().setPort(port).build();
     }
 
+    /**
+     * Specify the Cassandra keyspace where to read data.
+     */
     public Read<T> withKeyspace(String keyspace) {
       checkArgument(keyspace != null, "CassandraIO.read().withKeyspace(keyspace) called with "
           + "null keyspace");
       return builder().setKeyspace(keyspace).build();
     }
 
+    /**
+     * Specify the Cassandra table where to read data.
+     */
     public Read<T> withTable(String table) {
       checkArgument(table != null, "CassandraIO.read().withTable(table) called with null table");
       return builder().setTable(table).build();
     }
 
+    /**
+     * Specify the entity class (annotated POJO). The {@link CassandraIO} will read the data and
+     * convert the data as entity instances. The {@link PCollection} resulting from the read will
+     * contains entity elements.
+     */
     public Read<T> withEntity(Class<T> entity) {
       checkArgument(entity != null, "CassandraIO.read().withEntity(entity) called with null "
           + "entity");
       return builder().setEntity(entity).build();
     }
 
+    /**
+     * Specify the {@link Coder} used to serialize the entity in the {@link PCollection}.
+     */
     public Read<T> withCoder(Coder<T> coder) {
       checkArgument(coder != null, "CassandraIO.read().withCoder(coder) called with null coder");
       return builder().setCoder(coder).build();
     }
 
+    /**
+     * Specify an instance of {@link CassandraService} used to connect and read from Cassandra
+     * database.
+     */
     public Read<T> withCassandraService(CassandraService<T> cassandraService) {
       checkArgument(cassandraService != null, "CassandraIO.read().withCassandraService(service)"
           + " called with null service");
@@ -160,7 +183,7 @@ public class CassandraIO {
     }
 
     @Override
-    public void validate(PBegin input) {
+    public void validate(PipelineOptions pipelineOptions) {
       checkState(hosts() != null || cassandraService() != null,
           "CassandraIO.read() requires a list of hosts to be set via withHosts(hosts) or a "
               + "Cassandra service to be set via withCassandraService(service)");
@@ -195,7 +218,7 @@ public class CassandraIO {
      * of a concrete Cassandra service dealing with a Cassandra instance.
      */
     @VisibleForTesting
-    CassandraService<T> getCassandraService(PipelineOptions pipelineOptions) {
+    CassandraService<T> getCassandraService() {
       if (cassandraService() != null) {
         return cassandraService();
       }
@@ -228,18 +251,18 @@ public class CassandraIO {
 
     @Override
     public BoundedReader<T> createReader(PipelineOptions pipelineOptions) {
-      return spec.getCassandraService(pipelineOptions).createReader(this);
+      return spec.getCassandraService().createReader(this);
     }
 
     @Override
     public long getEstimatedSizeBytes(PipelineOptions pipelineOptions) throws Exception {
-      return spec.getCassandraService(pipelineOptions).getEstimatedSizeBytes(spec);
+      return spec.getCassandraService().getEstimatedSizeBytes(spec);
     }
 
     @Override
     public List<BoundedSource<T>> split(long desiredBundleSizeBytes,
                                                    PipelineOptions pipelineOptions) {
-      return spec.getCassandraService(pipelineOptions)
+      return spec.getCassandraService()
           .split(spec, desiredBundleSizeBytes);
     }
 
@@ -271,6 +294,9 @@ public class CassandraIO {
     @Nullable abstract CassandraService<T> cassandraService();
     abstract Builder<T> builder();
 
+    /**
+     * Specify the Cassandra instance hosts where to write data.
+     */
     public Write<T> withHosts(List<String> hosts) {
       checkArgument(hosts != null, "CassandraIO.write().withHosts(hosts) called with null hosts");
       checkArgument(hosts.isEmpty(), "CassandraIO.write().withHosts(hosts) called with empty "
@@ -278,24 +304,37 @@ public class CassandraIO {
       return builder().setHosts(hosts).build();
     }
 
+    /**
+     * Specify the Cassandra instance port number where to write data.
+     */
     public Write<T> withPort(int port) {
       checkArgument(port > 0, "CassandraIO.write().withPort(port) called with invalid port "
           + "number (%d)", port);
       return builder().setPort(port).build();
     }
 
+    /**
+     * Specify the Cassandra keyspace where to write data.
+     */
     public Write<T> withKeyspace(String keyspace) {
       checkArgument(keyspace != null, "CassandraIO.write().withKeyspace(keyspace) called with "
           + "null keyspace");
       return builder().setKeyspace(keyspace).build();
     }
 
+    /**
+     * Specify the entity class in the input {@link PCollection}. The {@link CassandraIO} will
+     * map this entity to the Cassandra table thanks to the annotations.
+     */
     public Write<T> withEntity(Class<T> entity) {
       checkArgument(entity != null, "CassandraIO.write().withEntity(entity) called with null "
           + "entity");
       return builder().setEntity(entity).build();
     }
 
+    /**
+     * Specify the {@link CassandraService} used to connect and write into the Cassandra database.
+     */
     public Write<T> withCassandraService(CassandraService<T> cassandraService) {
       checkArgument(cassandraService != null, "CassandraIO.write().withCassandraService"
           + "(service) called with null service");
@@ -303,7 +342,7 @@ public class CassandraIO {
     }
 
     @Override
-    public void validate(PCollection<T> input) {
+    public void validate(PipelineOptions pipelineOptions) {
       checkState(hosts() != null || cassandraService() != null,
           "CassandraIO.write() requires a list of hosts to be set via withHosts(hosts) or a "
               + "Cassandra service to be set via withCassandraService(service)");
@@ -318,13 +357,7 @@ public class CassandraIO {
 
     @Override
     public PDone expand(PCollection<T> input) {
-      input.apply(ParDo.of(new WriteFn<T>(this,
-          new SerializableFunction<PipelineOptions, CassandraService<T>>() {
-        @Override
-        public CassandraService<T> apply(PipelineOptions input) {
-          return getCassandraService(input);
-        }
-      })));
+      input.apply(ParDo.of(new WriteFn<T>(this)));
       return PDone.in(input.getPipeline());
     }
 
@@ -344,7 +377,7 @@ public class CassandraIO {
      * of a concrete Cassandra service dealing with a Cassandra instance.
      */
     @VisibleForTesting
-    CassandraService<T> getCassandraService(PipelineOptions pipelineOptions) {
+    CassandraService<T> getCassandraService() {
       if (cassandraService() != null) {
         return cassandraService();
       }
@@ -356,22 +389,16 @@ public class CassandraIO {
   private static class WriteFn<T> extends DoFn<T, Void> {
 
     private final Write<T> spec;
-    private final SerializableFunction<PipelineOptions, CassandraService<T>>
-        cassandraServiceFactory;
     private CassandraService.Writer writer;
 
-    public WriteFn(Write<T> spec,
-                   SerializableFunction<PipelineOptions, CassandraService<T>>
-                       cassandraServiceFactory) {
+    public WriteFn(Write<T> spec) {
       this.spec = spec;
-      this.cassandraServiceFactory = cassandraServiceFactory;
     }
 
-    @StartBundle
-    public void startBundle(Context context) throws Exception {
+    @Setup
+    public void setup() throws Exception {
       if (writer == null) {
-        writer = cassandraServiceFactory.apply(context.getPipelineOptions()).createWriter(spec);
-        writer.start();
+        writer = spec.getCassandraService().createWriter(spec);
       }
     }
 
@@ -382,7 +409,7 @@ public class CassandraIO {
     }
 
     @Teardown
-    public void teardown() {
+    public void teardown() throws Exception {
       writer.close();
       writer = null;
     }

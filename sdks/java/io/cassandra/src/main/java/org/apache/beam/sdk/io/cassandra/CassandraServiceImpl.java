@@ -328,19 +328,15 @@ public class CassandraServiceImpl<T> implements CassandraService<T> {
 
     private final CassandraIO.Write<T> spec;
 
-    private Cluster cluster;
-    private Session session;
-    private MappingManager mappingManager;
+    private final Cluster cluster;
+    private final Session session;
+    private final MappingManager mappingManager;
 
     public WriterImpl(CassandraIO.Write<T> spec) {
       this.spec = spec;
-    }
-
-    @Override
-    public void start() {
-      cluster = getCluster(spec.hosts(), spec.port());
-      session = cluster.connect(spec.keyspace());
-      mappingManager = new MappingManager(session);
+      this.cluster = getCluster(spec.hosts(), spec.port());
+      this.session = cluster.connect(spec.keyspace());
+      this.mappingManager = new MappingManager(session);
     }
 
     @Override
