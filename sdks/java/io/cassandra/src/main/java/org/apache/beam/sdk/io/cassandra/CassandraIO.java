@@ -87,10 +87,16 @@ public class CassandraIO {
 
   private CassandraIO() {}
 
+  /**
+   * Provide a {@link Read} {@link PTransform} to read data from a Cassandra database.
+   */
   public static <T> Read<T> read() {
     return new AutoValue_CassandraIO_Read.Builder<T>().build();
   }
 
+  /**
+   * Provide a {@link Write} {@link PTransform} to write data to a Cassandra database.
+   */
   public static <T> Write<T> write() {
     return new AutoValue_CassandraIO_Write.Builder<T>().build();
   }
