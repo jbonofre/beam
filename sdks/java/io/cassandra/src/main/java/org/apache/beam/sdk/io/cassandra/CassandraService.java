@@ -55,6 +55,10 @@ public interface CassandraService<T> extends Serializable {
    */
   interface Writer<T> extends AutoCloseable {
 
+    /**
+     * This method should be synchronous. It means you have to be sure that the entity is fully
+     * stored (and committed) into the Cassandra instance when you exit from this method.
+     */
     void write(T entity);
 
   }

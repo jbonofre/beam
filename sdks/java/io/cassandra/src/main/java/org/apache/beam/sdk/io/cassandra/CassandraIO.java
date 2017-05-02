@@ -403,9 +403,7 @@ public class CassandraIO {
 
     @Setup
     public void setup() throws Exception {
-      if (writer == null) {
-        writer = spec.getCassandraService().createWriter(spec);
-      }
+      writer = spec.getCassandraService().createWriter(spec);
     }
 
     @ProcessElement

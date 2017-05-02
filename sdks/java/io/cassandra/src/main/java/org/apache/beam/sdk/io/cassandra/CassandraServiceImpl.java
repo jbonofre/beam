@@ -339,6 +339,11 @@ public class CassandraServiceImpl<T> implements CassandraService<T> {
       this.mappingManager = new MappingManager(session);
     }
 
+    /**
+     * Write the entity to the Cassandra instance, using {@link Mapper} obtained with the
+     * {@link MappingManager}. This method use {@link Mapper#save(Object)} method, which is
+     * synchronous. It means the entity is guaranteed to be reliably committed to Cassandra.
+     */
     @Override
     public void write(T entity) {
       Mapper<T> mapper = (Mapper<T>) mappingManager.mapper(entity.getClass());
