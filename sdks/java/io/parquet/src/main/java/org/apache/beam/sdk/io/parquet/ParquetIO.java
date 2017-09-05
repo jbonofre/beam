@@ -18,7 +18,6 @@
 package org.apache.beam.sdk.io.parquet;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.auto.value.AutoValue;
 
@@ -130,13 +129,6 @@ public class ParquetIO {
     }
 
     @Override
-    public void validate(PBegin input) {
-      checkState(path() != null, "ParquetIO.read() requires a path to be set via withPath(path)");
-      checkState(schema() != null,
-          "ParquetIO.read() requires a schema to be set via withSchema(schema)");
-    }
-
-    @Override
     public void populateDisplayData(DisplayData.Builder builder) {
       builder.add(DisplayData.item("path", path()));
       builder.add(DisplayData.item("schema", schema().toString()));
@@ -199,14 +191,6 @@ public class ParquetIO {
     public void populateDisplayData(DisplayData.Builder builder) {
       builder.add(DisplayData.item("path", path()));
       builder.add(DisplayData.item("schema", schema()));
-    }
-
-    @Override
-    public void validate(PCollection<GenericRecord> input) {
-      checkState(path() != null,
-          "ParquetIO.write() requires a path to be set via withPath(path)");
-      checkState(schema() != null,
-          "ParquetIO.write() requires a schema to be set via withSchema(schema)");
     }
 
     @Override
