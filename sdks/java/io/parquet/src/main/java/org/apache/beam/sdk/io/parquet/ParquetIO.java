@@ -34,6 +34,7 @@ import org.apache.beam.sdk.transforms.display.DisplayData;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.avro.AvroParquetWriter;
@@ -93,6 +94,7 @@ public class ParquetIO {
 
     @Nullable abstract String path();
     @Nullable abstract Schema schema();
+    @Nullable abstract Configuration configuration();
 
     abstract Builder builder();
 
@@ -100,6 +102,8 @@ public class ParquetIO {
     abstract static class Builder {
       abstract Builder setPath(String path);
       abstract Builder setSchema(Schema schema);
+      abstract Builder setConfiguration(Configuration configuration);
+
       abstract Read build();
     }
 
@@ -120,11 +124,21 @@ public class ParquetIO {
       return builder().setSchema(schema).build();
     }
 
+
+    /**
+     * Define the additional configuration.
+     */
+    public Read withConfiguration(Configuration configuration) {
+      checkArgument(configuration != null,
+          "ParquetIO.read().withConfiguration(configuration) called with null configuration");
+      return builder().setConfiguration(configuration).build();
+    }
+
     @Override
     public PCollection<GenericRecord> expand(PBegin input) {
       return input
           .apply(Create.of(path()))
-          .apply(ParDo.of(new ReadFn()))
+          .apply(ParDo.of(new ReadFn(configuration())))
           .setCoder(AvroCoder.of(schema()));
     }
 
@@ -135,12 +149,21 @@ public class ParquetIO {
     }
 
     static class ReadFn extends DoFn<String, GenericRecord> {
+      private Configuration configuration;
+
+      ReadFn(Configuration configuration) {
+        super();
+        this.configuration = configuration;
+      }
 
       @ProcessElement
       public void processElement(ProcessContext processContext) throws Exception {
         Path path = new Path(processContext.element());
-        try (ParquetReader<GenericRecord> reader =
-                 AvroParquetReader.<GenericRecord>builder(path).build()) {
+        AvroParquetReader.Builder<GenericRecord> builder = AvroParquetReader.<GenericRecord>builder(path);
+        if (configuration != null) {
+          builder.withConf(configuration);
+        }
+        try (ParquetReader<GenericRecord> reader = builder.build()) {
           GenericRecord read;
           while ((read = reader.read()) != null) {
             processContext.output(read);
@@ -160,6 +183,7 @@ public class ParquetIO {
 
     @Nullable abstract String path();
     @Nullable abstract String schema();
+    @Nullable abstract Configuration configuration();
 
     abstract Builder builder();
 
@@ -167,6 +191,8 @@ public class ParquetIO {
     abstract static class Builder {
       abstract Builder setPath(String path);
       abstract Builder setSchema(String schema);
+      abstract Builder setConfiguration(Configuration configuration);
+
       abstract Write build();
     }
 
@@ -185,6 +211,15 @@ public class ParquetIO {
       checkArgument(schema != null,
           "ParquetIO.write().withSchema(schema) called with null schema");
       return builder().setSchema(schema).build();
+    }
+
+    /**
+     * Define the additional configuration {@link Configuration} to be written in the Parquet file.
+     */
+    public Write withConfiguration(Configuration configuration) {
+      checkArgument(configuration != null,
+          "ParquetIO.write().withConfiguration(configuration) called with null configuration");
+      return builder().setConfiguration(configuration).build();
     }
 
     @Override
@@ -212,7 +247,12 @@ public class ParquetIO {
       public void setup() throws Exception {
         Path path = new Path(spec.path());
         Schema schema = new Schema.Parser().parse(spec.schema());
-        writer = AvroParquetWriter.<GenericRecord>builder(path).withSchema(schema).build();
+        Configuration configuration = spec.configuration();
+        AvroParquetWriter.Builder<GenericRecord> builder = AvroParquetWriter.<GenericRecord>builder(path).withSchema(schema);
+        if (configuration != null) {
+          builder.withConf(configuration);
+        }
+        writer = builder.build();
       }
 
       @ProcessElement
