@@ -17,9 +17,12 @@
  */
 package org.apache.beam.sdk.io.redis;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
+import java.util.Set;
 
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
@@ -89,37 +92,47 @@ public class RedisIOTest {
       pipeline.run();
   }
 
-  @Test
-  public void testGetReadWithNotMatchingKeyPattern() throws Exception {
-    try (EmbeddedRedis embeddedRedis = new EmbeddedRedis()) {
-      insertKV(embeddedRedis);
+  @Test public void testGetReadWithNotMatchingKeyPattern() throws Exception {
+    PCollection<KV<String, String>> read = pipeline.apply(
+        RedisIO.read().withConnectionConfiguration(createConnection(embeddedRedis))
+            .withKeyPattern("foobar"));
 
-      PCollection<KV<String, String>> read = pipeline.apply(
-          RedisIO.read()
-              .withConnectionConfiguration(createConnection(embeddedRedis))
-              .withKeyPattern("foobar"));
+    PAssert.thatSingleton(read.apply("Count", Count.<KV<String, String>>globally())).isEqualTo(0L);
 
-      PAssert.thatSingleton(read.apply("Count", Count.<KV<String, String>>globally()))
-          .isEqualTo(0L);
+    pipeline.run();
+  }
 
-      pipeline.run();
-    }
+  @Test public void testGetReadAll() throws Exception {
+    PCollection<KV<String, String>> readAll = pipeline.apply(Create.of("Key 0", "Key 1"))
+        .apply(RedisIO.readAll().withConnectionConfiguration(createConnection(embeddedRedis)));
+
+    PAssert.thatSingleton(readAll.apply("Count", Count.<KV<String, String>>globally()))
+        .isEqualTo(2L);
+
+    pipeline.run();
   }
 
   @Test
-  public void testGetReadAll() throws Exception {
-    try (EmbeddedRedis embeddedRedis = new EmbeddedRedis()) {
-      insertKV(embeddedRedis);
+  public void testWrite() throws Exception {
+    ArrayList<KV<String, String>> data = new ArrayList<>();
+    for (int i = 0; i < 100; i++) {
+      KV<String, String> kv = KV.of("wkey " + i, "wvalue " + i);
+      data.add(kv);
+    }
+    PCollection<KV<String, String>> input =
+        pipeline.apply(Create.of(data));
 
-      PCollection<KV<String, String>> readAll =
-          pipeline.apply(Create.of("Key 0", "Key 1"))
-          .apply(RedisIO.readAll()
-              .withConnectionConfiguration(createConnection(embeddedRedis)));
+    input.apply(RedisIO.write().withConnectionConfiguration(createConnection(embeddedRedis)));
 
-      PAssert.thatSingleton(readAll.apply("Count", Count.<KV<String, String>>globally()))
-          .isEqualTo(2L);
+    pipeline.run();
 
-      pipeline.run();
+    Jedis jedis = new Jedis("localhost", embeddedRedis.getPort());
+    Set<String> values = jedis.keys("wkey*");
+    assertEquals(100, values.size());
+
+    for (int i = 0; i < 100; i++) {
+      String value = jedis.get("wkey " + i);
+      assertEquals("wvalue " + i, value);
     }
   }
 

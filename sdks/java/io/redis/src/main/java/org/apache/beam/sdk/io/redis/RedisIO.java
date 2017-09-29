@@ -43,8 +43,7 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.beam.sdk.values.PDone;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;
 import redis.clients.jedis.ScanParams;
@@ -94,11 +93,26 @@ import redis.clients.jedis.ScanResult;
  *    // here we have a PCollection<KV<String,String>>
  *
  * }</pre>
+ *
+ * <h3>Writing Redis key/value pairs</h3>
+ *
+ * <p>{@link #write()} provides a sink to write key/value pairs represented as
+ * {@link KV} from an incoming {@link PCollection}.
+ *
+ * <p>To configure the target Redis server, you have to provide Redis server hostname and port
+ * number. The following example illustrates how to configure a sink:
+ *
+ * <pre>{@code
+ *
+ *  pipeline.apply(...)
+ *    // here we a have a PCollection<String, String> with key/value pairs
+ *    .apply(RedisIO.write()
+ *        .withConnectionConfiguration(RedisConnectionConfiguration.create("localhost", 6379));
+ *
+ * }</pre>
  */
 @Experimental(Experimental.Kind.SOURCE_SINK)
 public class RedisIO {
-
-  private static final Logger LOG = LoggerFactory.getLogger(RedisIO.class);
 
   /**
    * Read data from a Redis server.
@@ -113,6 +127,13 @@ public class RedisIO {
    */
   public static ReadAll readAll() {
     return new AutoValue_RedisIO_ReadAll.Builder().build();
+  }
+
+  /**
+   * Write data to a Redis server.
+   */
+  public static Write write() {
+    return new AutoValue_RedisIO_Write.Builder().build();
   }
 
   private RedisIO() {
@@ -289,6 +310,89 @@ public class RedisIO {
           .apply(Reshuffle.<Integer, KV<String, String>>of())
           .apply(Values.<KV<String, String>>create());
     }
+  }
+
+  /**
+   * A {@link PTransform} to write to a Redis server.
+   */
+  @AutoValue
+  public abstract static class Write extends PTransform<PCollection<KV<String, String>>, PDone> {
+
+    @Nullable abstract RedisConnectionConfiguration connectionConfiguration();
+
+    abstract Builder builder();
+
+    @AutoValue.Builder
+    abstract static class Builder {
+
+      abstract Builder setConnectionConfiguration(
+          RedisConnectionConfiguration connectionConfiguration);
+
+      abstract Write build();
+
+    }
+
+    public Write withConnectionConfiguration(RedisConnectionConfiguration connection) {
+      checkArgument(connection != null, "connection can not be null");
+      return builder().setConnectionConfiguration(connection).build();
+    }
+
+    @Override
+    public PDone expand(PCollection<KV<String, String>> input) {
+      checkArgument(connectionConfiguration() != null, "withConnectionConfiguration() is required");
+
+      input.apply(ParDo.of(new WriteFn(this)));
+      return PDone.in(input.getPipeline());
+    }
+
+    private static class WriteFn extends DoFn<KV<String, String>, Void> {
+
+      private static final int DEFAULT_BATCH_SIZE = 1000;
+
+      private final Write spec;
+
+      private transient Jedis jedis;
+      private transient Pipeline pipeline;
+
+      private int batchCount;
+
+      public WriteFn(Write spec) {
+        this.spec = spec;
+      }
+
+      @Setup
+      public void setup() {
+        jedis = spec.connectionConfiguration().connect();
+      }
+
+      @StartBundle
+      public void startBundle() {
+        pipeline = jedis.pipelined();
+        pipeline.multi();
+        batchCount = 0;
+      }
+
+      @ProcessElement
+      public void processElement(ProcessContext processContext) {
+        KV<String, String> record = processContext.element();
+        pipeline.append(record.getKey(), record.getValue());
+
+        if (batchCount >= DEFAULT_BATCH_SIZE) {
+          pipeline.exec();
+        }
+      }
+
+      @FinishBundle
+      public void finishBundle() {
+        pipeline.exec();
+      }
+
+      @Teardown
+      public void teardown() {
+        jedis.close();
+      }
+    }
+
   }
 
 }
