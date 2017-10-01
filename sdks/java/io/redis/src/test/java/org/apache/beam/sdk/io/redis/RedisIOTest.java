@@ -92,7 +92,8 @@ public class RedisIOTest {
       pipeline.run();
   }
 
-  @Test public void testGetReadWithNotMatchingKeyPattern() throws Exception {
+  @Test
+  public void testGetReadWithNotMatchingKeyPattern() throws Exception {
     PCollection<KV<String, String>> read = pipeline.apply(
         RedisIO.read().withConnectionConfiguration(createConnection(embeddedRedis))
             .withKeyPattern("foobar"));
@@ -102,7 +103,8 @@ public class RedisIOTest {
     pipeline.run();
   }
 
-  @Test public void testGetReadAll() throws Exception {
+  @Test
+  public void testGetReadAll() throws Exception {
     PCollection<KV<String, String>> readAll = pipeline.apply(Create.of("Key 0", "Key 1"))
         .apply(RedisIO.readAll().withConnectionConfiguration(createConnection(embeddedRedis)));
 
