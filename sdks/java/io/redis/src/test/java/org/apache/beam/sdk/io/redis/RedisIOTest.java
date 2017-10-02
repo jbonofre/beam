@@ -17,12 +17,9 @@
  */
 package org.apache.beam.sdk.io.redis;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
-import java.util.Set;
 
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
@@ -35,7 +32,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import redis.clients.jedis.Jedis;
 import redis.embedded.RedisServer;
 
 /**
@@ -50,7 +46,6 @@ public class RedisIOTest {
   @Before
   public void before() throws Exception {
     embeddedRedis = new EmbeddedRedis();
-    insertKV(embeddedRedis);
   }
 
   @After
@@ -59,97 +54,34 @@ public class RedisIOTest {
   }
 
   @Test
-  public void testGetRead() throws Exception {
-    ArrayList<KV<String, String>> expected = new ArrayList<>();
-    for (int i = 0; i < 100; i++) {
-      KV<String, String> kv = KV.of("Key " + i, "Value " + i);
-      expected.add(kv);
-    }
+  public void testWriteRead() throws Exception {
+    RedisConnectionConfiguration connection = createConnection(embeddedRedis);
 
-    PCollection<KV<String, String>> readAll = pipeline
-        .apply(RedisIO.read().withConnectionConfiguration(createConnection(embeddedRedis)));
-
-    PAssert.that(readAll).containsInAnyOrder(expected);
-
-    pipeline.run();
-  }
-
-  @Test
-  public void testGetReadWithKeyPattern() throws Exception {
-      ArrayList<KV<String, String>> expected = new ArrayList<>();
-      expected.add(KV.of("Key 1", "Value 1"));
-      for (int i = 10; i < 20; i++) {
-        expected.add(KV.of("Key " + i, "Value " + i));
-      }
-
-      PCollection<KV<String, String>> read = pipeline.apply(
-          RedisIO.read()
-            .withConnectionConfiguration(createConnection(embeddedRedis))
-            .withKeyPattern("Key 1*"));
-
-      PAssert.that(read).containsInAnyOrder(expected);
-
-      pipeline.run();
-  }
-
-  @Test
-  public void testGetReadWithNotMatchingKeyPattern() throws Exception {
-    PCollection<KV<String, String>> read = pipeline.apply(
-        RedisIO.read().withConnectionConfiguration(createConnection(embeddedRedis))
-            .withKeyPattern("foobar"));
-
-    PAssert.thatSingleton(read.apply("Count", Count.<KV<String, String>>globally())).isEqualTo(0L);
-
-    pipeline.run();
-  }
-
-  @Test
-  public void testGetReadAll() throws Exception {
-    PCollection<KV<String, String>> readAll = pipeline.apply(Create.of("Key 0", "Key 1"))
-        .apply(RedisIO.readAll().withConnectionConfiguration(createConnection(embeddedRedis)));
-
-    PAssert.thatSingleton(readAll.apply("Count", Count.<KV<String, String>>globally()))
-        .isEqualTo(2L);
-
-    pipeline.run();
-  }
-
-  @Test
-  public void testWrite() throws Exception {
     ArrayList<KV<String, String>> data = new ArrayList<>();
     for (int i = 0; i < 100; i++) {
-      KV<String, String> kv = KV.of("wkey " + i, "wvalue " + i);
+      KV<String, String> kv = KV.of("key " + i, "value " + i);
       data.add(kv);
     }
-    PCollection<KV<String, String>> input =
-        pipeline.apply(Create.of(data));
-
-    input.apply(RedisIO.write().withConnectionConfiguration(createConnection(embeddedRedis)));
+    PCollection<KV<String, String>> write = pipeline.apply(Create.of(data));
+    write.apply(RedisIO.write().withConnectionConfiguration(connection));
 
     pipeline.run();
 
-    Jedis jedis = new Jedis("localhost", embeddedRedis.getPort());
-    Set<String> values = jedis.keys("wkey*");
-    assertEquals(100, values.size());
+    PCollection<KV<String, String>> read = pipeline.apply("Read",
+        RedisIO.read().withConnectionConfiguration(connection).withKeyPattern("key*"));
+    PAssert.that(read).containsInAnyOrder(data);
 
-    for (int i = 0; i < 100; i++) {
-      String value = jedis.get("wkey " + i);
-      assertEquals("wvalue " + i, value);
-    }
+    PCollection<KV<String,  String>> readNotMatch = pipeline.apply("ReadNotMatch",
+        RedisIO.read().withConnectionConfiguration(connection).withKeyPattern("foobar*"));
+    PAssert.thatSingleton(readNotMatch.apply(Count.<KV<String, String>>globally())).isEqualTo(0L);
+
+    pipeline.run();
   }
 
   private RedisConnectionConfiguration createConnection(EmbeddedRedis embeddedRedis) {
     return RedisConnectionConfiguration.create()
         .withHost("localhost")
         .withPort(embeddedRedis.getPort());
-  }
-
-  private void insertKV(EmbeddedRedis embeddedRedis) {
-    Jedis jedis = new Jedis("localhost", embeddedRedis.getPort());
-    for (int i = 0; i < 100; i++) {
-      jedis.set("Key " + i, "Value " + i);
-    }
-    jedis.quit();
   }
 
   /**
