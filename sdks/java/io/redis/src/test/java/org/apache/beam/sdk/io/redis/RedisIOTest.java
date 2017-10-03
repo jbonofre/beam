@@ -39,7 +39,9 @@ import redis.embedded.RedisServer;
  */
 public class RedisIOTest {
 
-  @Rule public TestPipeline pipeline = TestPipeline.create();
+  @Rule public TestPipeline writePipeline = TestPipeline.create();
+  @Rule public TestPipeline readPipeline = TestPipeline.create();
+  @Rule public TestPipeline readNoKeyPipeline = TestPipeline.create();
 
   private EmbeddedRedis embeddedRedis;
 
@@ -62,20 +64,22 @@ public class RedisIOTest {
       KV<String, String> kv = KV.of("key " + i, "value " + i);
       data.add(kv);
     }
-    PCollection<KV<String, String>> write = pipeline.apply(Create.of(data));
+    PCollection<KV<String, String>> write = writePipeline.apply(Create.of(data));
     write.apply(RedisIO.write().withConnectionConfiguration(connection));
 
-    pipeline.run();
+    writePipeline.run();
 
-    PCollection<KV<String, String>> read = pipeline.apply("Read",
+    PCollection<KV<String, String>> read = readPipeline.apply("Read",
         RedisIO.read().withConnectionConfiguration(connection).withKeyPattern("key*"));
     PAssert.that(read).containsInAnyOrder(data);
 
-    PCollection<KV<String,  String>> readNotMatch = pipeline.apply("ReadNotMatch",
+    readPipeline.run();
+
+    PCollection<KV<String,  String>> readNotMatch = readNoKeyPipeline.apply("ReadNotMatch",
         RedisIO.read().withConnectionConfiguration(connection).withKeyPattern("foobar*"));
     PAssert.thatSingleton(readNotMatch.apply(Count.<KV<String, String>>globally())).isEqualTo(0L);
 
-    pipeline.run();
+    readNoKeyPipeline.run();
   }
 
   private RedisConnectionConfiguration createConnection(EmbeddedRedis embeddedRedis) {
