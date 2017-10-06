@@ -32,6 +32,9 @@ import org.apache.beam.runners.core.StateInternalsFactory;
 import org.apache.beam.runners.spark.SparkRunner;
 import org.apache.beam.runners.spark.coders.CoderHelpers;
 import org.apache.beam.runners.spark.util.SideInputBroadcast;
+import org.apache.beam.runners.spark.util.SparkCompat.FlatMapFunction;
+import org.apache.beam.runners.spark.util.SparkCompat.IterableIterator;
+import org.apache.beam.runners.spark.util.SparkCompat.PairFlatMapFunction;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.reflect.DoFnSignature;
@@ -48,9 +51,7 @@ import org.apache.beam.sdk.values.PValue;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.WindowingStrategy;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.storage.StorageLevel;
@@ -149,7 +150,7 @@ public final class TranslationUtils {
   public static <K, V> PairFlatMapFunction<Iterator<KV<K, V>>, K, V> toPairFlatMapFunction() {
     return new PairFlatMapFunction<Iterator<KV<K, V>>, K, V>() {
       @Override
-      public Iterable<Tuple2<K, V>> call(final Iterator<KV<K, V>> itr) {
+      public IterableIterator<Tuple2<K, V>> call(final Iterator<KV<K, V>> itr) {
         final Iterator<Tuple2<K, V>> outputItr =
             Iterators.transform(
                 itr,
@@ -160,13 +161,7 @@ public final class TranslationUtils {
                     return new Tuple2<>(kv.getKey(), kv.getValue());
                   }
                 });
-        return new Iterable<Tuple2<K, V>>() {
-
-          @Override
-          public Iterator<Tuple2<K, V>> iterator() {
-            return outputItr;
-          }
-        };
+        return new IterableIterator<Tuple2<K, V>>(outputItr);
       }
     };
   }
@@ -181,11 +176,12 @@ public final class TranslationUtils {
     };
   }
 
+
   /** A pair to {@link KV} flatmap function . */
   static <K, V> FlatMapFunction<Iterator<Tuple2<K, V>>, KV<K, V>> fromPairFlatMapFunction() {
     return new FlatMapFunction<Iterator<Tuple2<K, V>>, KV<K, V>>() {
       @Override
-      public Iterable<KV<K, V>> call(Iterator<Tuple2<K, V>> itr) {
+      public IterableIterator<KV<K, V>> call(Iterator<Tuple2<K, V>> itr) {
         final Iterator<KV<K, V>> outputItr =
             Iterators.transform(
                 itr,
@@ -195,12 +191,7 @@ public final class TranslationUtils {
                     return KV.of(t2._1(), t2._2());
                   }
                 });
-        return new Iterable<KV<K, V>>() {
-          @Override
-          public Iterator<KV<K, V>> iterator() {
-            return outputItr;
-          }
-        };
+        return new IterableIterator<KV<K, V>>(outputItr);
       }
     };
   }
@@ -351,7 +342,7 @@ public final class TranslationUtils {
     return new PairFlatMapFunction<Iterator<T>, K, V>() {
 
       @Override
-      public Iterable<Tuple2<K, V>> call(Iterator<T> itr) throws Exception {
+      public IterableIterator<Tuple2<K, V>> call(Iterator<T> itr) throws Exception {
         final Iterator<Tuple2<K, V>> outputItr =
             Iterators.transform(
                 itr,
@@ -366,13 +357,7 @@ public final class TranslationUtils {
                     }
                   }
                 });
-        return new Iterable<Tuple2<K, V>>() {
-
-          @Override
-          public Iterator<Tuple2<K, V>> iterator() {
-            return outputItr;
-          }
-        };
+        return new IterableIterator<Tuple2<K, V>>(outputItr);
       }
     };
   }
@@ -389,12 +374,11 @@ public final class TranslationUtils {
    *     {@link Function} on every element.
    */
   public static <InputT, OutputT>
-      FlatMapFunction<Iterator<InputT>, OutputT> functionToFlatMapFunction(
+    FlatMapFunction<Iterator<InputT>, OutputT> functionToFlatMapFunction(
           final Function<InputT, OutputT> func) {
     return new FlatMapFunction<Iterator<InputT>, OutputT>() {
-
       @Override
-      public Iterable<OutputT> call(Iterator<InputT> itr) throws Exception {
+      public IterableIterator<OutputT> call(Iterator<InputT> itr) throws Exception {
         final Iterator<OutputT> outputItr =
             Iterators.transform(
                 itr,
@@ -409,13 +393,7 @@ public final class TranslationUtils {
                     }
                   }
                 });
-        return new Iterable<OutputT>() {
-
-          @Override
-          public Iterator<OutputT> iterator() {
-            return outputItr;
-          }
-        };
+        return new IterableIterator<OutputT>(outputItr);
       }
     };
   }

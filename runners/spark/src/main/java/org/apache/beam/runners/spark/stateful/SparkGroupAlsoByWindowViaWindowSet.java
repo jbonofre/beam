@@ -48,6 +48,8 @@ import org.apache.beam.runners.spark.translation.TranslationUtils;
 import org.apache.beam.runners.spark.translation.WindowingHelpers;
 import org.apache.beam.runners.spark.util.ByteArray;
 import org.apache.beam.runners.spark.util.GlobalWatermarkHolder;
+import org.apache.beam.runners.spark.util.SparkCompat.FlatMapFunction;
+import org.apache.beam.runners.spark.util.SparkCompat.IterableIterator;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
@@ -64,7 +66,6 @@ import org.apache.beam.sdk.values.WindowingStrategy;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext$;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.streaming.Duration;
@@ -534,7 +535,7 @@ public class SparkGroupAlsoByWindowViaWindowSet implements Serializable {
                           keyCoder, wvCoder.getValueCoder(), wvCoder.getWindowCoder());
 
               @Override
-              public Iterable<WindowedValue<KV<K, Iterable<InputT>>>> call(
+              public IterableIterator<WindowedValue<KV<K, Iterable<InputT>>>> call(
                   final Tuple2<
                           /*K*/ ByteArray,
                           Tuple2<StateAndTimers, /*WV<KV<K, Itr<I>>>*/ List<byte[]>>>
@@ -542,7 +543,8 @@ public class SparkGroupAlsoByWindowViaWindowSet implements Serializable {
                   throws Exception {
                 // drop the state since it is already persisted at this point.
                 // return in serialized form.
-                return CoderHelpers.fromByteArrays(t2._2()._2(), windowedValueKeyValueCoder);
+                return new IterableIterator<>(
+                    CoderHelpers.fromByteArrays(t2._2()._2(), windowedValueKeyValueCoder));
               }
             });
   }

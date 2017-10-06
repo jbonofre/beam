@@ -35,6 +35,8 @@ import org.apache.beam.runners.core.construction.TriggerTranslation;
 import org.apache.beam.runners.core.triggers.ExecutableTriggerStateMachine;
 import org.apache.beam.runners.core.triggers.TriggerStateMachines;
 import org.apache.beam.runners.spark.aggregators.NamedAggregators;
+import org.apache.beam.runners.spark.util.SparkCompat.FlatMapFunction;
+import org.apache.beam.runners.spark.util.SparkCompat.IterableIterator;
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.transforms.windowing.PaneInfo;
 import org.apache.beam.sdk.util.WindowedValue;
@@ -42,7 +44,6 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.WindowingStrategy;
 import org.apache.spark.Accumulator;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.joda.time.Instant;
 
 /**
@@ -71,7 +72,7 @@ public class SparkGroupAlsoByWindowViaOutputBufferFn<K, InputT, W extends Bounde
   }
 
   @Override
-  public Iterable<WindowedValue<KV<K, Iterable<InputT>>>> call(
+  public IterableIterator<WindowedValue<KV<K, Iterable<InputT>>>> call(
       WindowedValue<KV<K, Iterable<WindowedValue<InputT>>>> windowedValue) throws Exception {
     K key = windowedValue.getValue().getKey();
     Iterable<WindowedValue<InputT>> values = windowedValue.getValue().getValue();
@@ -115,7 +116,7 @@ public class SparkGroupAlsoByWindowViaOutputBufferFn<K, InputT, W extends Bounde
 
     reduceFnRunner.persist();
 
-    return outputter.getOutputs();
+    return new IterableIterator(outputter.getOutputs());
   }
 
   private void fireEligibleTimers(InMemoryTimerInternals timerInternals,

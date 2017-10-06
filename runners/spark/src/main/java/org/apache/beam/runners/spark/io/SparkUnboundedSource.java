@@ -31,6 +31,8 @@ import org.apache.beam.runners.spark.stateful.StateSpecFunctions;
 import org.apache.beam.runners.spark.translation.streaming.UnboundedDataset;
 import org.apache.beam.runners.spark.util.GlobalWatermarkHolder;
 import org.apache.beam.runners.spark.util.GlobalWatermarkHolder.SparkWatermarks;
+import org.apache.beam.runners.spark.util.SparkCompat.FlatMapFunction;
+import org.apache.beam.runners.spark.util.SparkCompat.IterableIterator;
 import org.apache.beam.sdk.io.Source;
 import org.apache.beam.sdk.io.UnboundedSource;
 import org.apache.beam.sdk.io.UnboundedSource.CheckpointMark;
@@ -44,7 +46,6 @@ import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.spark.Accumulator;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext$;
-import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.streaming.Duration;
@@ -309,8 +310,8 @@ public class SparkUnboundedSource {
       implements FlatMapFunction<Tuple2<Iterable<byte[]>, Metadata>, byte[]> {
 
     @Override
-    public Iterable<byte[]> call(Tuple2<Iterable<byte[]>, Metadata> t2) throws Exception {
-      return t2._1();
+    public IterableIterator<byte[]> call(Tuple2<Iterable<byte[]>, Metadata> t2) throws Exception {
+      return new IterableIterator(t2._1());
     }
   }
 }
