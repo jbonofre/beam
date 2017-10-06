@@ -37,6 +37,8 @@ import org.apache.beam.runners.core.TimerInternals;
 import org.apache.beam.runners.core.construction.SerializablePipelineOptions;
 import org.apache.beam.runners.core.metrics.MetricsContainerStepMap;
 import org.apache.beam.runners.spark.util.SideInputBroadcast;
+import org.apache.beam.runners.spark.util.SparkCompat.IterableIterator;
+import org.apache.beam.runners.spark.util.SparkCompat.PairFlatMapFunction;
 import org.apache.beam.runners.spark.util.SparkSideInputReader;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
@@ -45,7 +47,6 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.WindowingStrategy;
 import org.apache.spark.Accumulator;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import scala.Tuple2;
 
 
@@ -101,7 +102,7 @@ public class MultiDoFnFunction<InputT, OutputT>
   }
 
   @Override
-  public Iterable<Tuple2<TupleTag<?>, WindowedValue<?>>> call(
+  public IterableIterator<Tuple2<TupleTag<?>, WindowedValue<?>>> call(
       Iterator<WindowedValue<InputT>> iter) throws Exception {
 
     DoFnOutputManager outputManager = new DoFnOutputManager();
@@ -148,10 +149,10 @@ public class MultiDoFnFunction<InputT, OutputT>
     DoFnRunnerWithMetrics<InputT, OutputT> doFnRunnerWithMetrics =
         new DoFnRunnerWithMetrics<>(stepName, doFnRunner, metricsAccum);
 
-    return new SparkProcessContext<>(
+    return new IterableIterator<>(new SparkProcessContext<>(
         doFn, doFnRunnerWithMetrics, outputManager,
         stateful ? new TimerDataIterator(timerInternals) :
-            Collections.<TimerInternals.TimerData>emptyIterator()).processPartition(iter);
+            Collections.<TimerInternals.TimerData>emptyIterator()).processPartition(iter));
   }
 
   private static class TimerDataIterator implements Iterator<TimerInternals.TimerData> {
