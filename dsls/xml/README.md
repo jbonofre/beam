@@ -33,9 +33,10 @@ Few examples using Apache Beam Declarative API.
 and [reading and writing data](https://beam.apache.org/documentation/programming-guide/#io) from external storage.
 
 ## Running Examples
-
-Run the class org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner with flow xml file dsls/xml/src/main/java/org/apache/beam/dsls/xml/example/kafka/BeamFlow-Kafka-input-file-output-examples.xml
+To run the XML based example applications run  the class
+ org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner with an argument --dslXm=Your flow xml file
+Try with example (dsls/xml/src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml)
 #### How to run the example with DSL
-java org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner --dslXml=<flow-xml>
+java org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner --dslXml= "your flow xml  file absolute path".
 	
 
