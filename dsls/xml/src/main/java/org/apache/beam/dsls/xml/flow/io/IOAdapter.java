@@ -18,11 +18,11 @@
 
 package org.apache.beam.dsls.xml.flow.io;
 
+import com.google.auto.service.AutoService;
+
 import java.io.Serializable;
 
 import javax.annotation.Nonnull;
-
-import com.google.auto.service.AutoService;
 
 import org.apache.beam.dsls.xml.flow.metadata.model.InputType;
 import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
@@ -72,7 +72,8 @@ public interface IOAdapter<T, V> extends Serializable {
   /**
    * A utility method to transform the input data into a chosen output format. The output format can
    * be defined via URI for example kafka://topic-name?format=avro or
-   * hdfs://location1/data-locaton?format=parquet. The format can be defined as a output attribute format.
+   * hdfs://location1/data-locaton?format=parquet. The format can be defined as a output attribute
+   * format.
    */
   PCollection<?> format(@SuppressWarnings("rawtypes") PCollection data);
 }

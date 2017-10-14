@@ -20,14 +20,14 @@ package org.apache.beam.dsls.xml.flow.io.file;
 
 import com.google.auto.service.AutoService;
 
+import javax.annotation.Nonnull;
+
 import org.apache.beam.dsls.xml.flow.io.IOAdapter;
 import org.apache.beam.dsls.xml.flow.io.file.config.GcsFileReaderConfiguration;
 import org.apache.beam.dsls.xml.flow.io.file.config.GcsFileWriterConfiguration;
 import org.apache.beam.dsls.xml.flow.metadata.IOConfiguration;
 import org.apache.beam.dsls.xml.flow.metadata.model.InputType;
 import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
-
-import javax.annotation.Nonnull;
 
 /**
  * Reads text files that reads file(s) with the given filename or filename pattern from google file

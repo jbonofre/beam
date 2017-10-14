@@ -24,7 +24,8 @@ import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
 import org.apache.beam.dsls.xml.flow.utils.BeamUri;
 import org.apache.beam.dsls.xml.flow.utils.Utilities;
 /** A configuration management class for the File writer. */
-public class FileWriterConfiguration extends FileCommonConfiguration implements FileOutputConfiguration {
+public class FileWriterConfiguration extends FileCommonConfiguration
+    implements FileOutputConfiguration {
 
   /** Generated serial version id. */
   private static final long serialVersionUID = 3950434407985469113L;
@@ -100,6 +101,7 @@ public class FileWriterConfiguration extends FileCommonConfiguration implements 
     final String windowWriteValue = getProperties().get(WINDOWED_WRITES);
     return windowWriteValue != null && windowWriteValue.equalsIgnoreCase("true");
   }
+
   public String getPath() {
     return getUri().getPath();
   }

@@ -27,24 +27,18 @@ import org.apache.beam.sdk.values.PCollection;
 /**
  * This interface for Step handler of the DSL implementation. Apache beam supports different types
  * of operations, and each of them will have its own handler class . A handle factory class will be
- * responsible for creating them on demand..
+ * responsible for creating them on demand.
  *
  * @param <T> input data of type {@link PCollection}.
  * @param <V> output data of type {@link PCollection}.
  */
 interface ProcessExecutor<T, V> extends Serializable {
-  /**
-   * A method apply the operation on input {@link PCollection}
-   */
+  /** A method apply the operation on input {@link PCollection}. */
   PCollection<V> apply() throws PipelineDefinitionException;
 
-  /**
-   *Method to configure the current step
-   */
+  /** Method to configure the current step. */
   ProcessExecutor<T, V> assign(StepType metadata, PCollection<T> input);
 
-  /**
-   * A method to locate the correct operation type.
-   */
+  /** A method to locate the correct operation type. */
   boolean matched(SupportedType type);
 }

@@ -18,14 +18,14 @@
 
 package org.apache.beam.dsls.xml.flow.io;
 
+import java.io.Serializable;
+
 import org.apache.beam.dsls.xml.flow.metadata.model.InputType;
 import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
-
-import java.io.Serializable;
 
 /**
  * This class is responsible for selecting choosing appropriate Input, and output adapters supplied,
@@ -45,7 +45,7 @@ import java.io.Serializable;
  * The {@link #createInputAdapterAndApply(Pipeline, InputType)} is responsible for locating,
  * initializing the IOAdapter and execute the read operation on chosen IO adapter. The {@link
  * #createOutputAdapterAndApply(OutputType, PCollection)} is responsible for locating a right IO
- * adapter and execute the write operation.
+ * adapter and execute the write operation.</p>
  */
 public final class IOAdapterFactory implements Serializable {
 
@@ -74,9 +74,6 @@ public final class IOAdapterFactory implements Serializable {
   /**
    * The method is responsible for locating, initialize the Output adapter and execute the write
    * operation on chosen IO adapter.
-   *
-   * @param pipline A reference to the current {@link Pipeline} that manages a directed acyclic
-   *     graph of {@link PTransform PTransforms}.
    * @param output A reference of the output metadata.
    * @return the instance of {@link PCollection} contains the data read from the selected source.
    */

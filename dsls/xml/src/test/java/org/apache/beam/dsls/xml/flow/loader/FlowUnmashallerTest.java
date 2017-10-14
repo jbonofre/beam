@@ -63,7 +63,7 @@ public class FlowUnmashallerTest {
   @Test
   public void testFlowUnmarshallingCreatesObjects() throws FlowDescriptorValidationException {
     FlowDefinitionType flowDefinition =
-        um.getFlowDefinition(new File(Utilities.getFileResource("BeamFlowExample.xml")));
+        um.getFlowDefinition(new File(Utilities.getFileResource("BeamFlow-File-in-File-out.xml")));
     assertNotNull(flowDefinition);
   }
 
@@ -76,7 +76,7 @@ public class FlowUnmashallerTest {
   @Test
   public void testFlowStructure() throws FlowDescriptorValidationException {
     FlowDefinitionType flowDefinition =
-        um.getFlowDefinition(new File(Utilities.getFileResource("BeamFlowExample.xml")));
+        um.getFlowDefinition(new File(Utilities.getFileResource("BeamFlow-File-in-File-out.xml")));
     assertNotNull(flowDefinition);
     PipelineType pipeline = flowDefinition.getPipeline();
     assertNotNull(pipeline);
