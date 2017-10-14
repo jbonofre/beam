@@ -4,7 +4,7 @@
 
 		<input name="txtInput" uri="gs://apache-beam-samples/shakespeare/*">
 			<attributes>
-				<attribute name="format" value="txt" />
+				<attribute name="compression.type" value="auto" />
 			</attributes>
 
 		</input>
