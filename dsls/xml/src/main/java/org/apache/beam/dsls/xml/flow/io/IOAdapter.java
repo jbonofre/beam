@@ -27,7 +27,6 @@ import javax.annotation.Nonnull;
 import org.apache.beam.dsls.xml.flow.metadata.model.InputType;
 import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
 import org.apache.beam.dsls.xml.flow.utils.BeamUri;
-import org.apache.beam.runners.direct.repackaged.com.google.protobuf.ByteString.Output;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
 
