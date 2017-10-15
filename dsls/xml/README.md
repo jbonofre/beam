@@ -27,16 +27,16 @@ the development of more complex pipelines.
 
 Few examples using Apache Beam Declarative API.
 
-1. [`WordCount`]is the simplest word count pipeline and introduces basic beam DSL concepts like [Pipelines](https://beam.apache.org/documentation/programming-guide/#pipeline),
-[PCollections](https://beam.apache.org/documentation/programming-guide/#pcollection),
-[ParDo](https://beam.apache.org/documentation/programming-guide/#transforms-pardo),
-and [reading and writing data](https://beam.apache.org/documentation/programming-guide/#io) from external storage.
+1. [`WordCount`]is the simplest word count pipeline and introduces basic beam DSL https://github.com/jbonofre/beam/blob/DSL_XML/dsls/xml/src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml
 
 ## Running Examples
-To run the XML based example applications run  the class
- org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner with an argument --dslXm=Your flow xml file
-Try with example (dsls/xml/src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml)
-#### How to run the example with DSL
-java org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner --dslXml= "your flow xml  file absolute path".
-	
 
+#### How to run the example with DSL
+1. ##### Run with direct runner
+ mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml**" -Pdirect-runner
+2. ##### Run with Spark runner
+ mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pspark-runner
+2. ##### Run with Flink runner 
+ mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pflink-runner
+ 3. ##### Run with Apex runner 
+ mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Papex-runner
