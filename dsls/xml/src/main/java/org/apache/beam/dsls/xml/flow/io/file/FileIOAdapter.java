@@ -62,8 +62,12 @@ public class FileIOAdapter extends AbstractIOAdapter {
   @Override
   public Read read() {
     return TextIO.read()
-        .from(fileReaderConiguration.getPath())
+        .from(getReadPath())
         .withCompressionType(fileReaderConiguration.getCompressionType());
+  }
+
+  private String getReadPath() {
+    return fileReaderConiguration.getPath();
   }
 
   public void init(@Nonnull InputType type) {
@@ -89,8 +93,12 @@ public class FileIOAdapter extends AbstractIOAdapter {
 
   public Write write() {
     return new Builder()
-        .beginWith(TextIO.write().to(fileWriterConfiguration.getPath()), fileWriterConfiguration)
+        .beginWith(TextIO.write().to(getWritePath()), fileWriterConfiguration)
         .checkAndBuild();
+  }
+
+  protected String getWritePath() {
+    return fileWriterConfiguration.getPath();
   }
 
   /** Builder to build {@link WriterHelper}. */

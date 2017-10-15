@@ -28,6 +28,7 @@ import org.apache.beam.dsls.xml.flow.io.file.config.GcsFileWriterConfiguration;
 import org.apache.beam.dsls.xml.flow.metadata.IOConfiguration;
 import org.apache.beam.dsls.xml.flow.metadata.model.InputType;
 import org.apache.beam.dsls.xml.flow.metadata.model.OutputType;
+import org.apache.beam.sdk.util.gcsfs.GcsPath;
 
 /**
  * Reads text files that reads file(s) with the given filename or filename pattern from google file
@@ -61,5 +62,8 @@ public class GcsFileIOAdapter extends FileIOAdapter {
   public void init(@Nonnull OutputType type) {
     super.init(type);
     fileWriterConfiguration = GcsFileWriterConfiguration.build(getProperties(), getDecodedURI());
+  }
+  protected String getWritePath() {
+    return GcsPath.fromUri(fileWriterConfiguration.getPath()).toString();
   }
 }
