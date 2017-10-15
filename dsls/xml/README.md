@@ -32,11 +32,11 @@ Few examples using Apache Beam Declarative API.
 ## Running Examples
 
 #### How to run the example with DSL
-1. ##### Run with direct runner
+##### Run with direct runner
  mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml**" -Pdirect-runner
-2. ##### Run with Spark runner
+##### Run with Spark runner
  mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pspark-runner
-2. ##### Run with Flink runner 
+##### Run with Flink runner 
  mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pflink-runner
- 3. ##### Run with Apex runner 
+##### Run with Apex runner 
  mvn compile exec:java -Dexec.mainClass=org.apache.beam.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Papex-runner
