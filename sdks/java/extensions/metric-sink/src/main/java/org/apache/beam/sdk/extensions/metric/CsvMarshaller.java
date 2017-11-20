@@ -1,7 +1,13 @@
 package org.apache.beam.sdk.extensions.metric;
 
-import org.apache.beam.sdk.metrics.*;
+import org.apache.beam.sdk.metrics.GaugeResult;
+import org.apache.beam.sdk.metrics.MetricName;
+import org.apache.beam.sdk.metrics.MetricQueryResults;
+import org.apache.beam.sdk.metrics.MetricResult;
 
+/**
+ * {@link Marshaller} converting the metric results as CSV formatted string.
+ */
 public class CsvMarshaller implements Marshaller {
 
   @Override

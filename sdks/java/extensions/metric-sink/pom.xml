@@ -37,6 +37,10 @@
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>

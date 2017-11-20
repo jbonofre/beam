@@ -1,16 +1,18 @@
 package org.apache.beam.sdk.extensions.metric;
 
-import org.apache.beam.sdk.Pipeline;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.metrics.MetricQueryResults;
 import org.apache.beam.sdk.metrics.MetricResults;
 import org.apache.beam.sdk.metrics.MetricsFilter;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
+/**
+ * Extension polling {@link PipelineResult} to get metrics, marshal those metrics in a format,
+ * and store to a backend.
+ */
 public class MetricSink {
 
   private final PipelineResult pipelineResult;
@@ -29,11 +31,15 @@ public class MetricSink {
 
     @Override
     public void run() {
-      MetricResults metricResults = pipelineResult.metrics();
-      MetricQueryResults metricQueryResults = metricResults
-          .queryMetrics(MetricsFilter.builder().build());
-      Object rawData = marshaller.marshall(metricQueryResults);
-      sink.write(rawData);
+      try {
+        MetricResults metricResults = pipelineResult.metrics();
+        MetricQueryResults metricQueryResults = metricResults
+            .queryMetrics(MetricsFilter.builder().build());
+        Object rawData = marshaller.marshall(metricQueryResults);
+        sink.write(rawData);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
     }
   }
 
