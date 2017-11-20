@@ -10,7 +10,7 @@ public class MetricSinkTest {
   public void pipelineTest() throws Exception {
     Pipeline pipeline = Pipeline.create();
     PipelineResult result = pipeline.run();
-    MetricSink metricSink = new MetricSink(result, new CsvMarshaller(), new FileSink("target/metric"), 5);
+    MetricSink metricSink = new MetricSink(result, new CsvMarshaller(), new FileSink("target/metric"), 1);
   }
 
 }

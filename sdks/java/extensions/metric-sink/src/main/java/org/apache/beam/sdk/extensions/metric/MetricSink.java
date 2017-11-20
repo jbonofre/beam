@@ -22,7 +22,7 @@ public class MetricSink {
     this.pipelineResult = pipelineResult;
     this.marshaller = marshaller;
     this.sink = sink;
-    scheduler.schedule(new PollingThread(), period, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(new PollingThread(), 0, period, TimeUnit.SECONDS);
   }
 
   private class PollingThread implements Runnable {
