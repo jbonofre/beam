@@ -35,6 +35,7 @@
     <module>google-cloud-platform-core</module>
     <module>jackson</module>
     <module>join-library</module>
+    <module>metric-sink</module>
     <module>protobuf</module>
     <module>sketching</module>
     <module>sorter</module>
