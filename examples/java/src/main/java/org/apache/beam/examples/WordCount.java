@@ -81,7 +81,10 @@ import org.apache.beam.sdk.values.PCollection;
  * by William Shakespeare. You can override it and choose your own input with {@code --inputFile}.
  */
 public class WordCount {
-
+  private static String outputPathName = "pom_count";
+  private static String outputPathWDroot = "sample";
+  private static String outputPathWDmid = "\\word-count-beam\\";
+  private static final String outputPath = outputPathWDroot + outputPathWDmid + outputPathName;
   /**
    * Concept #2: You can make your pipeline assembly code less verbose by defining your DoFns
    * statically out-of-line. This DoFn tokenizes lines of text into individual words; we pass it
@@ -168,6 +171,7 @@ public class WordCount {
      * Set this required option to specify where to write the output.
      */
     @Description("Path of the file to write to")
+    //@Default.String(outputPath)
     @Required
     String getOutput();
     void setOutput(String value);
@@ -183,7 +187,8 @@ public class WordCount {
     p.apply("ReadLines", TextIO.read().from(options.getInputFile()))
      .apply(new CountWords())
      .apply(MapElements.via(new FormatAsTextFn()))
-     .apply("WriteCounts", TextIO.write().to(options.getOutput()));
+     .apply("WriteCounts", TextIO.write().to(outputPath));
+     //.apply("WriteCounts", TextIO.write().to(options.getOutput()));
 
     p.run().waitUntilFinish();
   }

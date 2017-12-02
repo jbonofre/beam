@@ -262,6 +262,7 @@
               <artifactId>maven-resources-plugin</artifactId>
               <version>${maven-resources-plugin.version}</version>
             </plugin>
+			
           </plugins>
         </pluginManagement>
 

@@ -16,15 +16,15 @@
  * limitations under the License.
  */
 package org.apache.beam.sdk.io.azure;
-
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
+
+import javax.annotation.Nonnull;
+
 import org.apache.beam.sdk.annotations.Experimental;
 import org.apache.beam.sdk.io.FileSystem;
 import org.apache.beam.sdk.io.FileSystemRegistrar;
 import org.apache.beam.sdk.options.PipelineOptions;
-
-import javax.annotation.Nonnull;
 
 /**
  * {@link AutoService} registrar for the {@link AzureFileSystem}.

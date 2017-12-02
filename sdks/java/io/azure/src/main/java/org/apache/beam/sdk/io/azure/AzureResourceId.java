@@ -17,14 +17,19 @@
  */
 package org.apache.beam.sdk.io.azure;
 
-import org.apache.beam.sdk.io.fs.ResolveOptions;
-import org.apache.beam.sdk.io.fs.ResourceId;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+//import static com.google.common.base.Preconditions.checkState;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import org.apache.beam.sdk.io.fs.ResolveOptions;
+import org.apache.beam.sdk.io.fs.ResourceId;
+
 
 /**
  * {@link ResourceId} implementation for the {@link AzureFileSystem}.
@@ -35,6 +40,11 @@ public class AzureResourceId implements ResourceId {
 
   AzureResourceId(URI uri) {
     this.uri = uri;
+  }
+
+  static AzureResourceId fromPath(Path path, boolean isDirectory) {
+    checkNotNull(path, "path");
+    return new AzureResourceId(new File(path.toString()).toURI());
   }
 
   @Override
@@ -60,6 +70,9 @@ public class AzureResourceId implements ResourceId {
 
   public boolean isDirectory() {
     return uri.getPath().endsWith("/");
+  }
+  Path getPath() {
+    return Paths.get(new File(uri).getAbsolutePath());
   }
 
   @Override

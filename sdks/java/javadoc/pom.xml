@@ -291,9 +291,9 @@
                 <property name="runtime_classpath" refid="maven.runtime.classpath" />
                 <property name="test_classpath" refid="maven.test.classpath" />
                 <property name="plugin_classpath" refid="maven.plugin.classpath" />
-                <ant antfile="${basedir}/ant.xml">
+                <!--<ant antfile="${basedir}\ant.xml">
                   <target name="javadoc" />
-                </ant>
+                </ant>-->
               </target>
             </configuration>
             <goals>
@@ -307,6 +307,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
         <executions>
+		  <!--
           <execution>
             <id>attach-artifacts</id>
             <phase>package</phase>
@@ -320,7 +321,7 @@
                 </artifact>
               </artifacts>
             </configuration>
-          </execution>
+          </execution>-->
         </executions>
       </plugin>
     </plugins>
