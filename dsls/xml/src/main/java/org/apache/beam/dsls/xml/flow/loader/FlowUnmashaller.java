@@ -49,7 +49,7 @@ public class FlowUnmashaller {
 
   /** Constructor this class locates the schema and load it. */
   public FlowUnmashaller() {
-    String schemaTypeSchemaFile = getFileResource("beamflow.xsd");
+    String schemaTypeSchemaFile = getFileResource("/beamflow.xsd");
     flowDSLSchema = getSchema(schemaTypeSchemaFile);
   }
 
@@ -59,7 +59,7 @@ public class FlowUnmashaller {
   private Schema getSchema(String schemaTypeSchemaFile) {
     try {
       return SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-          .newSchema(new File(schemaTypeSchemaFile));
+          .newSchema(getClass().getClassLoader().getResource("beamflow.xsd"));
     } catch (SAXException e) {
       throw new IllegalStateException("Could not initilize the flow DSL schema.", e);
     }

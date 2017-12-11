@@ -105,7 +105,7 @@ public class KafkaIOAdapter extends AbstractIOAdapter {
       kafkaWriter = kafkaWriter.withKeySerializer(producerConfiguration.getKeySerializerClass());
     }
     if (producerConfiguration.isValueSerializerDefined()) {
-      kafkaWriter = kafkaWriter.withKeySerializer(producerConfiguration.getKeySerializerClass());
+      kafkaWriter = kafkaWriter.withValueSerializer(producerConfiguration.getKeySerializerClass());
     }
     kafkaWriter.updateProducerProperties(producerConfiguration.getDelta());
     return kafkaWriter;
