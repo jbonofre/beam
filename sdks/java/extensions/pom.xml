@@ -37,6 +37,8 @@
     <module>join-library</module>
     <module>protobuf</module>
     <module>sorter</module>
+    <module>dsl-xml</module>
+
   </modules>
 
 </project>
