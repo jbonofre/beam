@@ -37,17 +37,17 @@ import org.apache.beam.sdk.options.PipelineOptions;
 public interface AdlFileSystemOptions extends PipelineOptions {
 
   @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Authorizaion End Point")
-  @Default.String("https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/oauth2/token")
+  @Default.String("SECUREDATA")
   String getAadAuthEndpoint();
   void setAadAuthEndpoint(String value);
 
   @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Client ID")
-  @Default.String("f336a26f-e14b-4f19-93ae-ff56b0aa9146")
+  @Default.String("SECUREDATA")
   String getAadClientId();
   void setAadClientId(String value);
 
   @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Client Secret")
-  @Default.String("8bd03de9-dd3c-4211-aad6-e77ea3330257")
+  @Default.String("SECUREDATA")
   String getAadClientSecret();
   void setAadClientSecret(String value);
 
