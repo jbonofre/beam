@@ -1,0 +1,178 @@
+ Volume in drive C is OSDisk
+ Volume Serial Number is 24EC-E7C3
+
+ Directory of C:\Deploy\github\beam\runners\apex\src\main\java\org\apache\beam\runners\apex
+
+01/04/2018  09:15 AM             2,406 ApexRunnerRegistrar.java
+               1 File(s)          2,406 bytes
+
+ Directory of C:\Deploy\github\beam\runners\apex\src\test\java\org\apache\beam\runners\apex
+
+01/04/2018  09:15 AM             1,783 ApexRunnerRegistrarTest.java
+               1 File(s)          1,783 bytes
+
+ Directory of C:\Deploy\github\beam\runners\core-construction-java\src\main\java\org\apache\beam\runners\core\construction
+
+01/04/2018  09:15 AM             1,372 TransformPayloadTranslatorRegistrar.java
+               1 File(s)          1,372 bytes
+
+ Directory of C:\Deploy\github\beam\runners\direct-java\src\main\java\org\apache\beam\runners\direct
+
+01/04/2018  09:15 AM             2,161 DirectRegistrar.java
+               1 File(s)          2,161 bytes
+
+ Directory of C:\Deploy\github\beam\runners\direct-java\src\test\java\org\apache\beam\runners\direct
+
+01/04/2018  09:15 AM             2,584 DirectRegistrarTest.java
+               1 File(s)          2,584 bytes
+
+ Directory of C:\Deploy\github\beam\runners\flink\src\main\java\org\apache\beam\runners\flink
+
+01/04/2018  09:15 AM             2,230 FlinkRunnerRegistrar.java
+               1 File(s)          2,230 bytes
+
+ Directory of C:\Deploy\github\beam\runners\flink\src\test\java\org\apache\beam\runners\flink
+
+01/04/2018  09:15 AM             1,740 FlinkRunnerRegistrarTest.java
+               1 File(s)          1,740 bytes
+
+ Directory of C:\Deploy\github\beam\runners\gearpump\src\main\java\org\apache\beam\runners\gearpump
+
+01/04/2018  09:15 AM             2,382 GearpumpRunnerRegistrar.java
+               1 File(s)          2,382 bytes
+
+ Directory of C:\Deploy\github\beam\runners\gearpump\src\test\java\org\apache\beam\runners\gearpump
+
+01/04/2018  09:15 AM             1,983 GearpumpRunnerRegistrarTest.java
+               1 File(s)          1,983 bytes
+
+ Directory of C:\Deploy\github\beam\runners\google-cloud-dataflow-java\src\main\java\org\apache\beam\runners\dataflow
+
+01/04/2018  09:15 AM             2,285 DataflowPipelineRegistrar.java
+               1 File(s)          2,285 bytes
+
+ Directory of C:\Deploy\github\beam\runners\google-cloud-dataflow-java\src\main\java\org\apache\beam\runners\dataflow\util
+
+01/04/2018  09:15 AM             1,954 CoderCloudObjectTranslatorRegistrar.java
+01/04/2018  09:15 AM             6,214 DefaultCoderCloudObjectTranslatorRegistrar.java
+               2 File(s)          8,168 bytes
+
+ Directory of C:\Deploy\github\beam\runners\google-cloud-dataflow-java\src\test\java\org\apache\beam\runners\dataflow
+
+01/04/2018  09:15 AM             2,671 DataflowPipelineRegistrarTest.java
+               1 File(s)          2,671 bytes
+
+ Directory of C:\Deploy\github\beam\runners\spark\src\main\java\org\apache\beam\runners\spark
+
+01/04/2018  09:15 AM             2,344 SparkRunnerRegistrar.java
+               1 File(s)          2,344 bytes
+
+ Directory of C:\Deploy\github\beam\runners\spark\src\test\java\org\apache\beam\runners\spark
+
+01/04/2018  09:15 AM             2,522 SparkRunnerRegistrarTest.java
+01/04/2018  09:15 AM             1,557 TestSparkPipelineOptionsRegistrar.java
+               2 File(s)          4,079 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\core\src\main\java\org\apache\beam\sdk\coders
+
+01/04/2018  09:15 AM             1,803 CoderProviderRegistrar.java
+               1 File(s)          1,803 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\core\src\main\java\org\apache\beam\sdk\io
+
+01/04/2018  09:15 AM             2,006 FileSystemRegistrar.java
+01/04/2018  09:15 AM             1,543 LocalFileSystemRegistrar.java
+               2 File(s)          3,549 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\core\src\main\java\org\apache\beam\sdk\options
+
+01/04/2018  09:15 AM             1,601 DefaultPipelineOptionsRegistrar.java
+01/04/2018  09:15 AM             1,651 PipelineOptionsRegistrar.java
+               2 File(s)          3,252 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\core\src\main\java\org\apache\beam\sdk\runners
+
+01/04/2018  09:15 AM             1,988 PipelineRunnerRegistrar.java
+               1 File(s)          1,988 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\core\src\test\java\org\apache\beam\sdk\io
+
+01/04/2018  09:15 AM             1,917 LocalFileSystemRegistrarTest.java
+               1 File(s)          1,917 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\extensions\google-cloud-platform-core\src\main\java\org\apache\beam\sdk\extensions\gcp\options
+
+01/04/2018  09:15 AM             1,572 GcpPipelineOptionsRegistrar.java
+               1 File(s)          1,572 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\extensions\google-cloud-platform-core\src\main\java\org\apache\beam\sdk\extensions\gcp\storage
+
+01/04/2018  09:15 AM             1,932 GcsFileSystemRegistrar.java
+               1 File(s)          1,932 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\extensions\google-cloud-platform-core\src\test\java\org\apache\beam\sdk\extensions\gcp\storage
+
+01/04/2018  09:15 AM             2,022 GcsFileSystemRegistrarTest.java
+               1 File(s)          2,022 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\extensions\protobuf\src\main\java\org\apache\beam\sdk\extensions\protobuf
+
+01/04/2018  09:15 AM             1,703 ProtobufCoderProviderRegistrar.java
+               1 File(s)          1,703 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\amqp\src\main\java\org\apache\beam\sdk\io\amqp
+
+01/04/2018  09:15 AM             1,678 AmqpMessageCoderProviderRegistrar.java
+               1 File(s)          1,678 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\azure\src\main\java\org\apache\beam\sdk\io\azure
+
+01/04/2018  09:15 AM             1,477 AzureFileSystemOptionsRegistrar.java
+01/04/2018  09:15 AM             1,749 AzureFileSystemRegistrar.java
+               2 File(s)          3,226 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\google-cloud-platform\src\main\java\org\apache\beam\sdk\io\gcp\bigquery
+
+01/04/2018  09:15 AM             1,774 BigQueryCoderProviderRegistrar.java
+               1 File(s)          1,774 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\google-cloud-platform\src\main\java\org\apache\beam\sdk\io\gcp\common
+
+01/04/2018  09:15 AM             1,646 GcpIoPipelineOptionsRegistrar.java
+               1 File(s)          1,646 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\google-cloud-platform\src\main\java\org\apache\beam\sdk\io\gcp\pubsub
+
+01/04/2018  09:15 AM             1,641 PubsubCoderProviderRegistrar.java
+               1 File(s)          1,641 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\google-cloud-platform\src\test\java\org\apache\beam\sdk\io\gcp\bigquery
+
+01/04/2018  09:15 AM             1,506 BigQueryCoderProviderRegistrarTest.java
+               1 File(s)          1,506 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\hadoop-file-system\src\main\java\org\apache\beam\sdk\io\hdfs
+
+01/04/2018  09:15 AM             1,480 HadoopFileSystemOptionsRegistrar.java
+01/04/2018  09:15 AM             2,647 HadoopFileSystemRegistrar.java
+               2 File(s)          4,127 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\hadoop-file-system\src\test\java\org\apache\beam\sdk\io\hdfs
+
+01/04/2018  09:15 AM             1,848 HadoopFileSystemOptionsRegistrarTest.java
+01/04/2018  09:15 AM             3,123 HadoopFileSystemRegistrarTest.java
+               2 File(s)          4,971 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\hbase\src\main\java\org\apache\beam\sdk\io\hbase
+
+01/04/2018  09:15 AM             1,693 HBaseCoderProviderRegistrar.java
+               1 File(s)          1,693 bytes
+
+ Directory of C:\Deploy\github\beam\sdks\java\io\hbase\src\test\java\org\apache\beam\sdk\io\hbase
+
+01/04/2018  09:15 AM             1,720 HBaseCoderProviderRegistrarTest.java
+               1 File(s)          1,720 bytes
+
+     Total Files Listed:
+              40 File(s)         81,908 bytes
+               0 Dir(s)  270,716,035,072 bytes free
