@@ -19,32 +19,41 @@ package org.apache.beam.sdk.io.kinesis;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.kinesis.AmazonKinesis;
-import com.amazonaws.services.kinesis.AmazonKinesisClientBuilder;
 import com.amazonaws.services.kinesis.clientlibrary.lib.worker.InitialPositionInStream;
 import com.amazonaws.services.kinesis.model.DescribeStreamResult;
+import com.amazonaws.services.kinesis.producer.IKinesisProducer;
+import com.amazonaws.services.kinesis.producer.KinesisProducer;
+import com.amazonaws.services.kinesis.producer.KinesisProducerConfiguration;
+import com.amazonaws.services.kinesis.producer.UserRecordResult;
 import com.google.auto.value.AutoValue;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Properties;
 import javax.annotation.Nullable;
 import org.apache.beam.sdk.annotations.Experimental;
 import org.apache.beam.sdk.io.Read.Unbounded;
+import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PDone;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link PTransform}s for reading from
+ * {@link PTransform}s for reading from and writing to
  * <a href="https://aws.amazon.com/kinesis/">Kinesis</a> streams.
+ *
+ * <h3>Reading from Kinesis</h3>
  *
  * <p>Example usage:
  *
@@ -111,10 +120,63 @@ import org.slf4j.LoggerFactory;
  *  .apply( ... ) // other transformations
  * }</pre>
  *
+ * <h3>Writing to Kinesis</h3>
+ *
+ * <p>Example usage:
+ *
+ * <pre>{@code
+ * PCollection<byte[]> data = ...;
+ *
+ * data.apply(KinesisIO.write()
+ *     .withStreamName("streamName")
+ *     .withPartitionKey("partitionKey")
+ *     .withAWSClientsProvider(AWS_KEY, AWS_SECRET, STREAM_REGION));
+ * }</pre>
+ *
+ * <p>As a client, you need to provide at least 3 things:
+ * <ul>
+ *   <li>name of the stream where you're going to write</li>
+ *   <li>partition key (or implementation of {@link KinesisPartitioner}) that defines which
+ *   partition will be used for writing</li>
+ *   <li>data used to initialize {@link AmazonKinesis} and {@link AmazonCloudWatch} clients:
+ *   <ul>
+ *     <li>credentials (aws key, aws secret)</li>
+ *    <li>region where the stream is located</li>
+ *   </ul></li>
+ * </ul>
+ *
+ * <p>In case if you need to define more complicated logic for key partitioning then you can
+ * create your own implementation of {@link KinesisPartitioner} and set it by
+ * {@link KinesisIO.Write#withPartitioner(KinesisPartitioner)}</p>
+ *
+ * <p>Internally, {@link KinesisIO.Write} relies on Amazon Kinesis Producer Library (KPL).
+ * This library can be configured with a set of {@link Properties} if needed.
+ *
+ * <p>Example usage of KPL configuration:
+ *
+ * <pre>{@code
+ * Properties properties = new Properties();
+ * properties.setProperty("KinesisEndpoint", "localhost");
+ * properties.setProperty("KinesisPort", "4567");
+ *
+ * PCollection<byte[]> data = ...;
+ *
+ * data.apply(KinesisIO.write()
+ *     .withStreamName("streamName")
+ *     .withPartitionKey("partitionKey")
+ *     .withAWSClientsProvider(AWS_KEY, AWS_SECRET, STREAM_REGION)
+ *     .withProducerProperties(properties));
+ * }</pre>
+ *
+ * <p>For more information about configuratiom parameters, see the
+ * <a href="https://github.com/awslabs/amazon-kinesis-producer/blob/master/java/amazon-kinesis-producer-sample/default_config.properties">sample of configuration file</a>.
  */
 @Experimental(Experimental.Kind.SOURCE_SINK)
 public final class KinesisIO {
+
   private static final Logger LOG = LoggerFactory.getLogger(KinesisIO.class);
+
+  public static final int DEFAULT_NUM_RETRIES = 10;
 
   /** Returns a new {@link Read} transform for reading from Kinesis. */
   public static Read read() {
@@ -122,6 +184,11 @@ public final class KinesisIO {
         .setMaxNumRecords(Long.MAX_VALUE)
         .setUpToDateThreshold(Duration.ZERO)
         .build();
+  }
+
+  /** A {@link PTransform} writing data to Kinesis. */
+  public static Write write() {
+    return new AutoValue_KinesisIO_Write.Builder().setRetries(DEFAULT_NUM_RETRIES).build();
   }
 
   /** Implementation of {@link #read}. */
@@ -272,52 +339,210 @@ public final class KinesisIO {
 
       return input.apply(transform);
     }
+  }
 
-    private static final class BasicKinesisProvider implements AWSClientsProvider {
-      private final String accessKey;
-      private final String secretKey;
-      private final Regions region;
-      @Nullable private final String serviceEndpoint;
+  /** Implementation of {@link #write}. */
+  @AutoValue
+  public abstract static class Write extends PTransform<PCollection<byte[]>, PDone> {
+    @Nullable
+    abstract String getStreamName();
+    @Nullable
+    abstract String getPartitionKey();
+    @Nullable
+    abstract KinesisPartitioner getPartitioner();
+    @Nullable
+    abstract Properties getProducerProperties();
+    @Nullable
+    abstract AWSClientsProvider getAWSClientsProvider();
+    abstract int getRetries();
 
-      private BasicKinesisProvider(
-          String accessKey, String secretKey, Regions region, @Nullable String serviceEndpoint) {
-        checkArgument(accessKey != null, "accessKey can not be null");
-        checkArgument(secretKey != null, "secretKey can not be null");
-        checkArgument(region != null, "region can not be null");
-        this.accessKey = accessKey;
-        this.secretKey = secretKey;
-        this.region = region;
-        this.serviceEndpoint = serviceEndpoint;
+    abstract Builder builder();
+
+    @AutoValue.Builder
+    abstract static class Builder {
+      abstract Builder setStreamName(String streamName);
+      abstract Builder setPartitionKey(String partitionKey);
+      abstract Builder setPartitioner(KinesisPartitioner partitioner);
+      abstract Builder setProducerProperties(Properties properties);
+      abstract Builder setAWSClientsProvider(AWSClientsProvider clientProvider);
+      abstract Builder setRetries(int retries);
+      abstract Write build();
+    }
+
+    public Write withStreamName(String streamName) {
+      return builder().setStreamName(streamName).build();
+    }
+
+    public Write withPartitionKey(String partitionKey) {
+      return builder().setPartitionKey(partitionKey).build();
+    }
+
+    public Write withPartitioner(KinesisPartitioner partitioner) {
+      return builder().setPartitioner(partitioner).build();
+    }
+
+    public Write withProducerProperties(Properties properties) {
+      return builder().setProducerProperties(properties).build();
+    }
+
+    public Write withAWSClientsProvider(AWSClientsProvider awsClientsProvider) {
+      return builder().setAWSClientsProvider(awsClientsProvider).build();
+    }
+
+    public Write withAWSClientsProvider(String awsAccessKey, String awsSecretKey, Regions region) {
+      return withAWSClientsProvider(awsAccessKey, awsSecretKey, region, null);
+    }
+
+    public Write withAWSClientsProvider(
+        String awsAccessKey, String awsSecretKey, Regions region, String serviceEndpoint) {
+      return withAWSClientsProvider(
+          new BasicKinesisProvider(awsAccessKey, awsSecretKey, region, serviceEndpoint));
+    }
+
+    public Write withRetries(int retries) {
+      return builder().setRetries(retries).build();
+    }
+
+    @Override
+    public PDone expand(PCollection<byte[]> input) {
+      checkArgument(getStreamName() != null, "withStreamName() is required");
+      checkArgument(
+          (getPartitionKey() != null) || (getPartitioner() != null),
+          "withPartitionKey() or withPartitioner() is required");
+      checkArgument(
+          getPartitionKey() == null || (getPartitioner() == null),
+          "only one of either withPartitionKey() or withPartitioner() is possible");
+      checkArgument(getAWSClientsProvider() != null, "withAWSClientsProvider() is required");
+      checkArgument(streamExists(getAWSClientsProvider().getKinesisClient(), getStreamName()),
+          "Stream %s does not exist", getStreamName());
+      input.apply(ParDo.of(new KinesisWriterFn(this)));
+      return PDone.in(input.getPipeline());
+    }
+
+    private static class KinesisWriterFn extends DoFn<byte[], Void> {
+      private final KinesisIO.Write spec;
+      private transient IKinesisProducer producer;
+      private transient KinesisPartitioner partitioner;
+
+      public KinesisWriterFn(KinesisIO.Write spec) {
+        this.spec = spec;
       }
 
-      private AWSCredentialsProvider getCredentialsProvider() {
-        return new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
-      }
-
-      @Override
-      public AmazonKinesis getKinesisClient() {
-        AmazonKinesisClientBuilder clientBuilder =
-            AmazonKinesisClientBuilder.standard().withCredentials(getCredentialsProvider());
-        if (serviceEndpoint == null) {
-          clientBuilder.withRegion(region);
-        } else {
-          clientBuilder.withEndpointConfiguration(
-              new AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region.getName()));
+      @Setup
+      public void setup() throws Exception {
+        // Init producer config
+        Properties props = spec.getProducerProperties();
+        if (props == null) {
+          props = new Properties();
         }
-        return clientBuilder.build();
+        KinesisProducerConfiguration config = KinesisProducerConfiguration.fromProperties(props);
+        // Fix to avoid the following message "WARNING: Exception during updateCredentials" during
+        // producer.destroy() call. More details can be found in this thread:
+        // https://github.com/awslabs/amazon-kinesis-producer/issues/10
+        config.setCredentialsRefreshDelay(100);
+
+        // Init Kinesis producer
+        producer = spec.getAWSClientsProvider().createKinesisProducer(config);
+        // Use custom partitioner if it exists
+        if (spec.getPartitioner() != null) {
+          partitioner = spec.getPartitioner();
+        }
       }
 
-      @Override
-      public AmazonCloudWatch getCloudWatchClient() {
-        AmazonCloudWatchClientBuilder clientBuilder =
-            AmazonCloudWatchClientBuilder.standard().withCredentials(getCredentialsProvider());
-        if (serviceEndpoint == null) {
-          clientBuilder.withRegion(region);
-        } else {
-          clientBuilder.withEndpointConfiguration(
-              new AwsClientBuilder.EndpointConfiguration(serviceEndpoint, region.getName()));
+      /**
+       * It adds a record asynchronously which then should be delivered by Kinesis producer in
+       * background (Kinesis producer forks native processes to do this job).
+       *
+       * <p>The records can be batched and then they will be sent in one HTTP request. Amazon KPL
+       * supports two types of batching - aggregation and collection - and they can be configured by
+       * producer properties.
+       *
+       * <p>More details can be found here:
+       * <a href="https://docs.aws.amazon.com/streams/latest/dev/kinesis-kpl-concepts.html">KPL Key Concepts</a> and
+       * <a href="https://docs.aws.amazon.com/streams/latest/dev/kinesis-kpl-config.html">Configuring the KPL</a>
+       */
+      @ProcessElement
+      public void processElement(ProcessContext c) throws Exception {
+        ByteBuffer data = ByteBuffer.wrap(c.element());
+
+        String partitionKey = spec.getPartitionKey();
+        String explicitHashKey = null;
+
+        // Use custom partitioner
+        if (partitioner != null) {
+          partitionKey = partitioner.getPartitionKey(c.element());
+          explicitHashKey = partitioner.getExplicitHashKey(c.element());
         }
-        return clientBuilder.build();
+
+        ListenableFuture<UserRecordResult> f =
+            producer.addUserRecord(spec.getStreamName(), partitionKey, explicitHashKey, data);
+        Futures.addCallback(f, new UserRecordResultFutureCallback());
+      }
+
+      @FinishBundle
+      public void finishBundle() throws Exception {
+        // Flush all outstanding records, blocking call
+        flushSync();
+
+        // Check if outstanding records still exist
+        checkOutstandingRecords();
+      }
+
+      @Teardown
+      public void tearDown() throws Exception {
+        if (producer != null) {
+          producer.destroy();
+        }
+      }
+
+      /**
+       * Own implementation of {@link KinesisProducer#flushSync()} to prevent infinite loop in case
+       * of failures.
+       */
+      private void flushSync() {
+        int retries = spec.getRetries();
+
+        while (producer.getOutstandingRecordsCount() > 0 && retries-- > 0) {
+          producer.flush();
+          try {
+            Thread.sleep(1000);
+          } catch (InterruptedException e) {
+            LOG.warn("An exception occurred while flush: " + e);
+          }
+        }
+      }
+
+      /**
+       * Check if some non-flushed records records still exist.
+       *
+       * @throws IOException
+       */
+      private void checkOutstandingRecords() throws IOException {
+        int outstandingRecordsCount = producer.getOutstandingRecordsCount();
+        if (outstandingRecordsCount > 0) {
+          String message =
+              String.format(
+                  "Number of outstanding records are greater than zero: %d",
+                  outstandingRecordsCount);
+          LOG.error(message);
+          throw new IOException(message);
+        }
+      }
+
+      private static class UserRecordResultFutureCallback
+          implements FutureCallback<UserRecordResult> {
+
+        @Override
+        public void onFailure(Throwable t) {
+          LOG.error("An exception occurred while processing a record", t);
+        }
+
+        @Override
+        public void onSuccess(UserRecordResult result) {
+          if (!result.isSuccessful()) {
+            LOG.warn("The record put was not successful");
+          }
+        }
       }
     }
   }
