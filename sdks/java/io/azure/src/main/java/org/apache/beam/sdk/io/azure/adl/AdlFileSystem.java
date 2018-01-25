@@ -53,7 +53,10 @@ import org.slf4j.LoggerFactory;
  * Adapts Azure filesystem connectors to be used as Apache Beam {@link FileSystem FileSystems}.
  */
 public class AdlFileSystem extends FileSystem<AdlResourceId> {
-  private static final Logger LOG = LoggerFactory.getLogger(AdlFileSystem.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AdlFileSystem.class);  
+  
+  //Azure Data Lake minimum Buffer size: 4MB
+  private static final int MINIMUM_UPLOAD_BUFFER_SIZE_BYTES = 4 * 1024 * 1024;
 
   private ADLStoreClient adlStoreClient;
 
@@ -78,103 +81,88 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
 
   @Override
   protected ReadableByteChannel open(AdlResourceId resourceId) throws IOException {
-    FileStatus fileStatus = fileSystem.getFileStatus(resourceId.toPath());
-    return new AdlSeekableByteChannel(adlStoreClient, fileSystem.open(resourceId.toPath()));
+    return new AdlReadableSeekableByteChannel(adlStoreClient, resourceId);
   }
 
-  /** An adapter around {@link FSDataInputStream} that implements {@link SeekableByteChannel}. */
-  private static class AdlSeekableByteChannel implements SeekableByteChannel {
-    private final FileStatus fileStatus;
-    private final FSDataInputStream inputStream;
-    private boolean closed;
-
-    private AdlSeekableByteChannel(FileStatus fileStatus, FSDataInputStream inputStream) {
-      this.fileStatus = fileStatus;
-      this.inputStream = inputStream;
-      this.closed = false;
-    }
-
-    @Override
-    public int read(ByteBuffer dst) throws IOException {
-      if (closed) {
-        throw new IOException("Channel is closed");
-      }
-      // O length read must be supported
-      int read = 0;
-      // We avoid using the ByteBuffer based read for Hadoop because some FSDataInputStream
-      // implementations are not ByteBufferReadable,
-      // See https://issues.apache.org/jira/browse/HADOOP-14603
-      if (dst.hasArray()) {
-        // does the same as inputStream.read(dst):
-        // stores up to dst.remaining() bytes into dst.array() starting at dst.position().
-        // But dst can have an offset with its backing array hence the + dst.arrayOffset()
-        read = inputStream.read(dst.array(), dst.position() + dst.arrayOffset(), dst.remaining());
-      } else {
-        // TODO: Add support for off heap ByteBuffers in case the underlying FSDataInputStream
-        // does not support reading from a ByteBuffer.
-        read = inputStream.read(dst);
-      }
-      if (read > 0) {
-        dst.position(dst.position() + read);
-      }
-      return read;
-    }
-
-    @Override
-    public int write(ByteBuffer src) throws IOException {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long position() throws IOException {
-      if (closed) {
-        throw new IOException("Channel is closed");
-      }
-      return inputStream.getPos();
-    }
-
-    @Override
-    public SeekableByteChannel position(long newPosition) throws IOException {
-      if (closed) {
-        throw new IOException("Channel is closed");
-      }
-      inputStream.seek(newPosition);
-      return this;
-    }
-
-    @Override
-    public long size() throws IOException {
-      if (closed) {
-        throw new IOException("Channel is closed");
-      }
-      return fileStatus.getLen();
-    }
-
-    @Override
-    public SeekableByteChannel truncate(long size) throws IOException {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isOpen() {
-      return !closed;
-    }
-
-    @Override
-    public void close() throws IOException {
-      closed = true;
-      inputStream.close();
-    }
-  }
-
-  /*
-  @Override protected List<MatchResult> match(List specs) throws IOException {
-    return null;
-  }
 
   @Override
-  protected WritableByteChannel create(AzureResourceId resourceId, CreateOptions createOptions)
+  protected List<MatchResult> match(List<String> specs) throws IOException {
+    //TODO - match for ADL glob's
+    ImmutableList.Builder<MatchResult> matchResults = ImmutableList.builder();
+    return matchResults.build();
+  }
+
+  
+  @AutoValue
+  abstract static class ExpandedGlob {
+//TODO Confirm for ADLS
+    abstract AdlResourceId getGlobPath();
+
+    @Nullable
+    abstract List<AdlResourceId> getExpandedPaths();
+
+    @Nullable
+    abstract IOException getException();
+
+    static ExpandedGlob create(AdlResourceId globPath, List<AdlResourceId> expandedPaths) {
+      checkNotNull(globPath, "globPath");
+      checkNotNull(expandedPaths, "expandedPaths");
+      return new AutoValue_AdlFileSystem_ExpandedGlob(globPath, expandedPaths, null);
+    }
+    
+    static ExpandedGlob create(AdlResourceId globPath, IOException exception) {
+      checkNotNull(globPath, "globPath");
+      checkNotNull(exception, "exception");
+      return new AutoValue_AdlFileSystem_ExpandedGlob(globPath, null, exception);
+    }
+    
+  }  
+
+  @AutoValue
+  abstract static class PathWithEncoding {
+//TODO Confirm for ADLS
+    abstract AdlResourceId getPath();
+
+    @Nullable
+    abstract String getContentEncoding();
+
+    @Nullable
+    abstract IOException getException();
+
+    static PathWithEncoding create(AdlResourceId path, String contentEncoding) {
+      checkNotNull(path, "path");
+      checkNotNull(contentEncoding, "contentEncoding");
+      return new AutoValue_AdlFileSystem_PathWithEncoding(path, contentEncoding, null);
+    }
+
+    static PathWithEncoding create(AdlResourceId path, IOException exception) {
+      checkNotNull(path, "path");
+      checkNotNull(exception, "exception");
+      return new AutoValue_AdlFileSystem_PathWithEncoding(path, null, exception);
+    }
+  }
+
+  private ExpandedGlob expandGlob(AdlResourceId glob) {
+    //TODO Build for ADLS
+    return ExpandedGlob.create(glob, expandedPaths.build());
+  }
+
+  private PathWithEncoding getPathContentEncoding(S3ResourceId path) {
+    //TODO Build for ADLS
+    return PathWithEncoding.create(path, Strings.nullToEmpty('NOT CREATED for ADLS YET');
+  }
+
+  private List<MatchResult> matchNonGlobPaths(Collection<AdlResourceId> paths) throws IOException {
+        //TODO Build for ADLS
+    List<Callable<MatchResult>> tasks = new ArrayList<>(paths.size());
+    return callTasks(tasks);
+  }
+
+
+  @Override
+  protected WritableByteChannel create(AdlResourceId resourceId, CreateOptions createOptions)
       throws IOException {
+    //TODO Build for ADLS
     LOG.debug("creating file {}", resourceId);
     String filePath = resourceId.getPath().toString();
     ADLStoreClient client = getClient();
@@ -186,15 +174,16 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
 
 
   @Override protected void copy(List srcResourceIds, List destResourceIds) throws IOException {
-
+    //TODO Build for ADLS
   }
 
   @Override protected void rename(List srcResourceIds, List destResourceIds) throws IOException {
-
+    //TODO Build for ADLS
   }
 
-  @Override protected void delete(Collection<AzureResourceId> resourceIds) throws IOException {
-    for (AzureResourceId resourceId : resourceIds) {
+  @Override protected void delete(Collection<AdlResourceId> resourceIds) throws IOException {
+        //TODO Build for ADLS
+    for (AdlResourceId resourceId : resourceIds) {
       try {
         Files.delete(resourceId.getPath());
       } catch (NoSuchFileException e) {
@@ -204,17 +193,17 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     }
   }
 
-  @Override protected AzureResourceId matchNewResource(String singleResourceSpec, boolean isDir) {
+  @Override protected AdlResourceId matchNewResource(String singleResourceSpec, boolean isDir) {
     Path path = Paths.get(singleResourceSpec);
-    return AzureResourceId.fromPath(path, isDir);
+    return AdlResourceId.fromPath(path, isDir);
   }
-*/
+  
   @Override protected String getScheme() {
     return AdlResourceId.SCHEME;
   }
 
   @VisibleForTesting
-  void setAdlFileSystem(ADLStoreClient adlStoreClientnS3) {
-    this.adlStoreClientnS3 = adlStoreClientnS3;
+  void setAdlFileSystem(ADLStoreClient adlStoreClientnAdl) {
+    this.adlStoreClientnAdl = adlStoreClientnAdl;
   }
 }

@@ -106,6 +106,10 @@ public class AdlResourceId implements ResourceId {
     return Objects.hashCode(uri);
   }
 
+  Optional<Long> getSize() {
+    // TODO Extract size from ADLStoreClient.getContentSummary
+    return Optional.fromNullable(size);
+  }
   /*
   Path toPath() {
     return new Path(uri);
