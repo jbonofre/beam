@@ -26,6 +26,8 @@ import org.apache.beam.sdk.io.FileSystem;
 import org.apache.beam.sdk.io.FileSystemRegistrar;
 import org.apache.beam.sdk.options.PipelineOptions;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * {@link AutoService} registrar for the {@link AdlFileSystem}.
  */
@@ -36,7 +38,12 @@ public class AdlFileSystemRegistrar implements FileSystemRegistrar {
   @Override
   public Iterable<FileSystem> fromOptions(@Nonnull PipelineOptions options) {
     checkNotNull(options, "The runner should utilize FileSystems.setDefaultPipelineOptions().");
-    return ImmutableList.<FileSystem>of(new AdlFileSystem(options.as(AdlFileSystemOptions.class)));
+    try {
+      return ImmutableList.<FileSystem>of(new AdlFileSystem(options.as(AdlFileSystemOptions.class)));
+    } catch (Exception e) {
+      // nothing to do
+    }
+    return null;
   }
 
 

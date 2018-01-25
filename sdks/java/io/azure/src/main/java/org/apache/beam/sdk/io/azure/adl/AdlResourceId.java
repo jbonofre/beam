@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import com.google.common.base.Optional;
 import org.apache.beam.sdk.io.fs.ResolveOptions;
 import org.apache.beam.sdk.io.fs.ResourceId;
 
@@ -108,7 +109,7 @@ public class AdlResourceId implements ResourceId {
 
   Optional<Long> getSize() {
     // TODO Extract size from ADLStoreClient.getContentSummary
-    return Optional.fromNullable(size);
+    return Optional.fromNullable(0L);
   }
   /*
   Path toPath() {

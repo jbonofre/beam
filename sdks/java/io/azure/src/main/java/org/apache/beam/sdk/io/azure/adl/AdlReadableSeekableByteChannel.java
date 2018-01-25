@@ -20,9 +20,6 @@ package org.apache.beam.sdk.io.azure.adl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import com.microsoft.azure.datalake.store.ADLStoreClient;
-import com.microsoft.azure.datalake.store.oauth2.AccessTokenProvider;
-import com.microsoft.azure.datalake.store.oauth2.ClientCredsTokenProvider;
-import com.microsoft.azure.datalake.store.DirectoryEntry;
 import com.microsoft.azure.datalake.store.ADLFileInputStream;
 
 import java.io.BufferedInputStream;
@@ -37,15 +34,15 @@ import java.nio.channels.SeekableByteChannel;
 /**
  * A readable S3 object, as a {@link SeekableByteChannel}.
  */
-class AdlReadableSeekableByteChannel implements SeekableByteChannel {
+public class AdlReadableSeekableByteChannel implements SeekableByteChannel {
 
-  private final ADLStoreClient adlStoreClient;
-  private final AdlResourceId path;
-  private final long contentLength;
+  private ADLStoreClient adlStoreClient;
+  private AdlResourceId path;
+  private long contentLength;
   private long position = 0;
   private boolean open = true;
   private ADLFileInputStream adlFileInputStream;
-  private ReadableByteChannel AdlContentChannel;
+  private ReadableByteChannel adlContentChannel;
 
   AdlReadableSeekableByteChannel(ADLStoreClient adlStoreClient, AdlResourceId path) throws IOException {
     this.adlStoreClient = checkNotNull(adlStoreClient, "adlStoreClient");
@@ -70,6 +67,7 @@ class AdlReadableSeekableByteChannel implements SeekableByteChannel {
     }
   }
   */
+  }
 
   @Override
   public int read(ByteBuffer destinationBuffer) throws IOException {
@@ -96,7 +94,7 @@ class AdlReadableSeekableByteChannel implements SeekableByteChannel {
         throw new IOException(e);
       }
       adlContentChannel = Channels.newChannel(
-          new BufferedInputStream(adlFileInputStream.read() , 1024 * 1024));
+          new BufferedInputStream(adlFileInputStream, 1024 * 1024));
     }
 
     int totalBytesRead = 0;
@@ -115,7 +113,7 @@ class AdlReadableSeekableByteChannel implements SeekableByteChannel {
     position += totalBytesRead;
     return totalBytesRead;
   }
-/*
+
   @Override
   public long position() throws ClosedChannelException {
     if (!isOpen()) {
@@ -136,14 +134,10 @@ class AdlReadableSeekableByteChannel implements SeekableByteChannel {
       return this;
     }
 
-    // The position has changed, so close the object to induce a re-open on the next call to read()
-    if (s3Object != null) {
-      s3Object.close();
-    }
     position = newPosition;
     return this;
   }
-*/
+
   @Override
   public long size() throws ClosedChannelException {
     if (!isOpen()) {
@@ -174,5 +168,4 @@ class AdlReadableSeekableByteChannel implements SeekableByteChannel {
   public SeekableByteChannel truncate(long size) {
     throw new NonWritableChannelException();
   }
-}
 }

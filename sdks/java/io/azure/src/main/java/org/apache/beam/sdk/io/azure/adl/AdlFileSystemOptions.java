@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 package org.apache.beam.sdk.io.azure.adl;
+
 import com.microsoft.azure.datalake.store.ADLStoreClient;
 import com.microsoft.azure.datalake.store.oauth2.AccessTokenProvider;
 import com.microsoft.azure.datalake.store.oauth2.ClientCredsTokenProvider;
@@ -23,6 +24,9 @@ import com.microsoft.azure.datalake.store.DirectoryEntry;
 
 
 import java.util.ArrayList;
+
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Map;

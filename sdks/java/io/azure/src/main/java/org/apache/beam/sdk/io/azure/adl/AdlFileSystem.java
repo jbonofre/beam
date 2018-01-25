@@ -17,7 +17,10 @@
  */
 package org.apache.beam.sdk.io.azure.adl;
 
-//ADLS DEPENDENCIES
+import com.google.auto.value.AutoValue;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.microsoft.azure.datalake.store.ADLException;
 import com.microsoft.azure.datalake.store.ADLStoreClient;
 import com.microsoft.azure.datalake.store.DirectoryEntry;
@@ -30,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -48,6 +52,10 @@ import org.apache.beam.sdk.io.fs.MatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 
 /**
  * Adapts Azure filesystem connectors to be used as Apache Beam {@link FileSystem FileSystems}.
@@ -60,7 +68,7 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
 
   private ADLStoreClient adlStoreClient;
 
-  AdlFileSystem(AdlFileSystemOptions options) {
+  AdlFileSystem(AdlFileSystemOptions options) throws Exception {
     checkNotNull(options, "options");
 
     if (Strings.isNullOrEmpty(options.getAadAuthEndpoint())) {
@@ -142,6 +150,7 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     }
   }
 
+  /*
   private ExpandedGlob expandGlob(AdlResourceId glob) {
     //TODO Build for ADLS
     return ExpandedGlob.create(glob, expandedPaths.build());
@@ -157,7 +166,7 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     List<Callable<MatchResult>> tasks = new ArrayList<>(paths.size());
     return callTasks(tasks);
   }
-
+*/
 
   @Override
   protected WritableByteChannel create(AdlResourceId resourceId, CreateOptions createOptions)
@@ -165,11 +174,14 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     //TODO Build for ADLS
     LOG.debug("creating file {}", resourceId);
     String filePath = resourceId.getPath().toString();
+    /*
     ADLStoreClient client = getClient();
     OutputStream stream = client.createFile(filePath, IfExists.OVERWRITE);
     return Channels.newChannel(
         new BufferedOutputStream(client.createFile(filePath, IfExists.OVERWRITE)));
-
+    */
+    // TODO return a concrete channel
+    return null;
   }
 
 
@@ -202,8 +214,10 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     return AdlResourceId.SCHEME;
   }
 
+  /*
   @VisibleForTesting
   void setAdlFileSystem(ADLStoreClient adlStoreClientnAdl) {
     this.adlStoreClientnAdl = adlStoreClientnAdl;
   }
+  */
 }
