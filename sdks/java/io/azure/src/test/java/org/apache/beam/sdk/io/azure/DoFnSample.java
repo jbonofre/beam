@@ -17,6 +17,11 @@
  */
 package org.apache.beam.sdk.io.azure;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -24,14 +29,17 @@ import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * Public class, so javadoc is a must have.
+ */
 public class DoFnSample {
 
-  public static void main(String[] args) throws Exception {
+  /**
+   * Public method, so javadoc is a must have.
+   *
+   * @param args Main args.
+   */
+  public static void main(String[] args) {
     PipelineOptions options = PipelineOptionsFactory.fromArgs(args).withValidation().create();
     Pipeline pipeline = Pipeline.create(options);
     List<String> data = new ArrayList();

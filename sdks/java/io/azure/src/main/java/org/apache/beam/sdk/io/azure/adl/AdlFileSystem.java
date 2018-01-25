@@ -17,24 +17,16 @@
  */
 package org.apache.beam.sdk.io.azure.adl;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.auto.value.AutoValue;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.microsoft.azure.datalake.store.ADLException;
 import com.microsoft.azure.datalake.store.ADLStoreClient;
-import com.microsoft.azure.datalake.store.DirectoryEntry;
-import com.microsoft.azure.datalake.store.IfExists;
 import com.microsoft.azure.datalake.store.oauth2.AccessTokenProvider;
 import com.microsoft.azure.datalake.store.oauth2.ClientCredsTokenProvider;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.net.URI;
-import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.file.Files;
@@ -44,6 +36,7 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Nullable;
 
 import org.apache.beam.sdk.io.FileSystem;
 import org.apache.beam.sdk.io.fs.CreateOptions;
@@ -52,19 +45,15 @@ import org.apache.beam.sdk.io.fs.MatchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-
 /**
  * Adapts Azure filesystem connectors to be used as Apache Beam {@link FileSystem FileSystems}.
  */
 public class AdlFileSystem extends FileSystem<AdlResourceId> {
-  private static final Logger LOG = LoggerFactory.getLogger(AdlFileSystem.class);  
-  
+
+  private static final Logger LOG = LoggerFactory.getLogger(AdlFileSystem.class);
+
   //Azure Data Lake minimum Buffer size: 4MB
-  private static final int MINIMUM_UPLOAD_BUFFER_SIZE_BYTES = 4 * 1024 * 1024;
+  // private static final int MINIMUM_UPLOAD_BUFFER_SIZE_BYTES = 4 * 1024 * 1024;
 
   private ADLStoreClient adlStoreClient;
 
@@ -73,17 +62,19 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
 
     if (Strings.isNullOrEmpty(options.getAadAuthEndpoint())) {
       LOG.info(
-          "The Azure Data Lake Beam extension was included in this build, but the AAD Auth Endpoint "
-              + "was not specified. If you don't plan to use Azure Data Lake, then ignore this message.");
+          "The Azure Data Lake Beam extension was included in this build,"
+                 + "but the AAD Auth Endpoint was not specified. If you don't"
+                 + " plan to use Azure Data Lake, then ignore this message.");
     }
 
-    AccessTokenProvider provider = 
-       new ClientCredsTokenProvider(options.getAadAuthEndpoint(), 
+    AccessTokenProvider provider =
+            new ClientCredsTokenProvider(options.getAadAuthEndpoint(),
                                     options.getAadClientId(),
                                     options.getAadClientSecret());
     System.out.println("created access token provider");
 
-    adlStoreClient = ADLStoreClient.createClient(new URI(options.getAdlInputURI()).getHost(), provider);
+    adlStoreClient = ADLStoreClient
+            .createClient(new URI(options.getAdlInputURI()).getHost(), provider);
     System.out.println("created client");
   }
 
@@ -94,16 +85,15 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
 
 
   @Override
-  protected List<MatchResult> match(List<String> specs) throws IOException {
+  protected List<MatchResult> match(List<String> specs) {
     //TODO - match for ADL glob's
     ImmutableList.Builder<MatchResult> matchResults = ImmutableList.builder();
     return matchResults.build();
   }
 
-  
   @AutoValue
   abstract static class ExpandedGlob {
-//TODO Confirm for ADLS
+    // TODO Confirm for ADLS
     abstract AdlResourceId getGlobPath();
 
     @Nullable
@@ -117,14 +107,14 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
       checkNotNull(expandedPaths, "expandedPaths");
       return new AutoValue_AdlFileSystem_ExpandedGlob(globPath, expandedPaths, null);
     }
-    
+
     static ExpandedGlob create(AdlResourceId globPath, IOException exception) {
       checkNotNull(globPath, "globPath");
       checkNotNull(exception, "exception");
       return new AutoValue_AdlFileSystem_ExpandedGlob(globPath, null, exception);
     }
-    
-  }  
+
+  }
 
   @AutoValue
   abstract static class PathWithEncoding {
@@ -209,7 +199,7 @@ public class AdlFileSystem extends FileSystem<AdlResourceId> {
     Path path = Paths.get(singleResourceSpec);
     return AdlResourceId.fromPath(path, isDir);
   }
-  
+
   @Override protected String getScheme() {
     return AdlResourceId.SCHEME;
   }

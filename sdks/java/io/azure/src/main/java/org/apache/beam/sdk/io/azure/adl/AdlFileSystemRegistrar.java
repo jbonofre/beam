@@ -16,6 +16,9 @@
  * limitations under the License.
  */
 package org.apache.beam.sdk.io.azure.adl;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.auto.service.AutoService;
 import com.google.common.collect.ImmutableList;
 
@@ -26,8 +29,6 @@ import org.apache.beam.sdk.io.FileSystem;
 import org.apache.beam.sdk.io.FileSystemRegistrar;
 import org.apache.beam.sdk.options.PipelineOptions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * {@link AutoService} registrar for the {@link AdlFileSystem}.
  */
@@ -37,14 +38,15 @@ public class AdlFileSystemRegistrar implements FileSystemRegistrar {
 
   @Override
   public Iterable<FileSystem> fromOptions(@Nonnull PipelineOptions options) {
-    checkNotNull(options, "The runner should utilize FileSystems.setDefaultPipelineOptions().");
+    checkNotNull(options,
+            "The runner should utilize FileSystems.setDefaultPipelineOptions().");
     try {
-      return ImmutableList.<FileSystem>of(new AdlFileSystem(options.as(AdlFileSystemOptions.class)));
+      return ImmutableList.<FileSystem>of(
+              new AdlFileSystem(options.as(AdlFileSystemOptions.class)));
     } catch (Exception e) {
       // nothing to do
     }
     return null;
   }
-
 
 }

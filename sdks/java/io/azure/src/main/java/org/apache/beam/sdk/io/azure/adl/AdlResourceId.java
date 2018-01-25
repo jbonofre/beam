@@ -19,7 +19,8 @@ package org.apache.beam.sdk.io.azure.adl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-//import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.base.Optional;
 
 import java.io.File;
 import java.net.URI;
@@ -27,10 +28,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-import com.google.common.base.Optional;
 import org.apache.beam.sdk.io.fs.ResolveOptions;
 import org.apache.beam.sdk.io.fs.ResourceId;
-
 
 /**
  * {@link ResourceId} implementation for the {@link AdlFileSystem}.
@@ -38,7 +37,6 @@ import org.apache.beam.sdk.io.fs.ResourceId;
 public class AdlResourceId implements ResourceId {
 
   static final String SCHEME = "adl";
-  
   private final URI uri;
 
   AdlResourceId(URI uri) {

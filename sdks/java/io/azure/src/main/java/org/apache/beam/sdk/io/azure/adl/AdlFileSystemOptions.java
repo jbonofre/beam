@@ -17,21 +17,10 @@
  */
 package org.apache.beam.sdk.io.azure.adl;
 
-import com.microsoft.azure.datalake.store.ADLStoreClient;
-import com.microsoft.azure.datalake.store.oauth2.AccessTokenProvider;
-import com.microsoft.azure.datalake.store.oauth2.ClientCredsTokenProvider;
-import com.microsoft.azure.datalake.store.DirectoryEntry;
-
-
-import java.util.ArrayList;
+import org.apache.beam.sdk.annotations.Experimental;
 
 import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.util.Map;
-
-import org.apache.beam.sdk.annotations.Experimental;
 import org.apache.beam.sdk.options.PipelineOptions;
 
 /**
@@ -40,17 +29,20 @@ import org.apache.beam.sdk.options.PipelineOptions;
 @Experimental(Experimental.Kind.FILESYSTEM)
 public interface AdlFileSystemOptions extends PipelineOptions {
 
-  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Authorizaion End Point")
+  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing"
+          + " - Azure Active Directory Authorizaion End Point")
   @Default.String("SECUREDATA")
   String getAadAuthEndpoint();
   void setAadAuthEndpoint(String value);
 
-  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Client ID")
+  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing"
+          + " - Azure Active Directory Client ID")
   @Default.String("SECUREDATA")
   String getAadClientId();
   void setAadClientId(String value);
 
-  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing - Azure Active Directory Client Secret")
+  @Description("Service Principal with access to Azure Data Lake Storage URL we are accessing"
+          + " - Azure Active Directory Client Secret")
   @Default.String("SECUREDATA")
   String getAadClientSecret();
   void setAadClientSecret(String value);

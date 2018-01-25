@@ -19,8 +19,9 @@ package org.apache.beam.sdk.io.azure.adl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import com.microsoft.azure.datalake.store.ADLStoreClient;
+
 import com.microsoft.azure.datalake.store.ADLFileInputStream;
+import com.microsoft.azure.datalake.store.ADLStoreClient;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -38,13 +39,13 @@ public class AdlReadableSeekableByteChannel implements SeekableByteChannel {
 
   private ADLStoreClient adlStoreClient;
   private AdlResourceId path;
-  private long contentLength;
+  private long contentLength = 0;
   private long position = 0;
   private boolean open = true;
   private ADLFileInputStream adlFileInputStream;
   private ReadableByteChannel adlContentChannel;
 
-  AdlReadableSeekableByteChannel(ADLStoreClient adlStoreClient, AdlResourceId path) throws IOException {
+  AdlReadableSeekableByteChannel(ADLStoreClient adlStoreClient, AdlResourceId path) {
     this.adlStoreClient = checkNotNull(adlStoreClient, "adlStoreClient");
     this.path = checkNotNull(path, "path");
 
@@ -82,12 +83,12 @@ public class AdlReadableSeekableByteChannel implements SeekableByteChannel {
     }
 
     if (adlFileInputStream == null) {
-      // ADLS Equivalent? - GetObjectRequest request = new GetObjectRequest(path.getBucket(), path.getKey());
-      //TODO 
-      //- ADLS File read for position / length 
+      // ADLS Equivalent?
+      // GetObjectRequest request = new GetObjectRequest(path.getBucket(), path.getKey());
+      //TODO
+      //- ADLS File read for position / length
       //- is desired position/length set via user file specificication?
-     this.position=0;
-      
+      this.position = 0;
       try {
         adlFileInputStream = adlStoreClient.getReadStream(path.toString());
       } catch (IOException e) {
