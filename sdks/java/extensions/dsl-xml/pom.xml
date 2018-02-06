@@ -466,7 +466,7 @@
 								<include>global.xjb</include>
 							</bindingIncludes>
 							<generateDirectory>target/generated-sources/dsl-model</generateDirectory>
-							<generatePackage>org.apache.beam.dsls.xml.flow.metadata.model</generatePackage>
+							<generatePackage>org.apache.beam.sdk.extensions.dsls.xml.flow.metadata.model</generatePackage>
 							<!-- For including equals,hashcode and toString methods in generated 
 								code -->
 							<plugins>

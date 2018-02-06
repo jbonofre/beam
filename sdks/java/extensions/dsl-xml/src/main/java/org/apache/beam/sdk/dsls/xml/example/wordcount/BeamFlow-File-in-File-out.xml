@@ -4,7 +4,7 @@
 
 		<input name="txtInput" uri="gs://apache-beam-samples/shakespeare/*">
 			<attributes>
-				<attribute name="format" value="txt" />
+				<attribute name="compression.type" value="auto" />
 			</attributes>
 
 		</input>
@@ -12,7 +12,7 @@
 	<outputs>
 		<output name="txtOutput" uri="file://tmp/count/myFile">
 			<attributes>
-				<attribute name="file.header" value="col1,cold,col3" />
+				<attribute name="file.header" value="col1,col2" />
 				<attribute name="file.footer" value="-------------------------------------" />
 				<attribute name="num.shards" value="3" />
 				<attribute name="file.suffix" value="csv" />

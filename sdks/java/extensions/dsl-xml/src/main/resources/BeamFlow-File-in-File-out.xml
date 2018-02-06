@@ -25,13 +25,13 @@
 	<steps>
 
 		<step name="ExtractWords" type="ParDo">
-			<handler.class>org.apache.beam.dsls.xml.example.wordcount.ExtractWordsFn</handler.class>
+			<handler.class>org.apache.beam.sdk.dsls.xml.example.wordcount.ExtractWordsFn</handler.class>
 		</step>
 		<step name="CountWords" type="Composite">
-			<handler.class>org.apache.beam.dsls.xml.example.wordcount.CountWords</handler.class>
+			<handler.class>org.apache.beam.sdk.dsls.xml.example.wordcount.CountWords</handler.class>
 		</step>
 		<step name="MapWords" type="Map">
-			<handler.class>org.apache.beam.dsls.xml.example.wordcount.FormatAsTextFn</handler.class>
+			<handler.class>org.apache.beam.sdk.dsls.xml.example.wordcount.FormatAsTextFn</handler.class>
 
 		</step>
 	</steps>
