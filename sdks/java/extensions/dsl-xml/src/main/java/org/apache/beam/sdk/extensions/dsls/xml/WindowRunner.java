@@ -15,6 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.beam.sdk.extensions.dsls.xml;
 
-/** Beam XML examples package. */
-package org.apache.beam.sdk.extensions.dsl.xml;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
+import org.apache.beam.sdk.values.PCollection;
+import org.joda.time.Duration;
+
+/** This is a Fixed window implementation. */
+public class WindowRunner extends PTransform<PCollection<String>, PCollection<String>> {
+
+  /** Generated serial version id. */
+  private static final long serialVersionUID = 1266126706528356130L;
+
+  @Override
+  public PCollection<String> expand(PCollection<String> dataCollection) {
+    return dataCollection.apply(Window.<String>into(FixedWindows.of(Duration.standardSeconds(10))));
+  }
+}

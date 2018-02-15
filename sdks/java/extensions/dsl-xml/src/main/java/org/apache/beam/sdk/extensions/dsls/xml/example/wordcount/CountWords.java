@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.beam.sdk.dsls.xml.example.wordcount;
+package org.apache.beam.sdk.extensions.dsls.xml.example.wordcount;
 
 import org.apache.beam.sdk.transforms.Count;
 import org.apache.beam.sdk.transforms.PTransform;

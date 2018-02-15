@@ -15,6 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.beam.sdk.extensions.dsls.xml;
 
-/** Beam XML examples package. */
-package org.apache.beam.sdk.dsls.xml.example.wordcount;
+import org.apache.beam.sdk.io.kafka.KafkaRecord;
+import org.apache.beam.sdk.transforms.DoFn;
+
+/**
+ * This class transforms a {@link KafkaRecord} value to String message and returns to the caller.
+ */
+public final class BasicTransformer extends DoFn<KafkaRecord<String, String>, String> {
+  /** Generated serial version id. */
+  private static final long serialVersionUID = -7023495600654237757L;
+
+  @ProcessElement
+  public void processElement(ProcessContext c) {
+    c.output(c.element().getKV().getValue());
+  }
+}
