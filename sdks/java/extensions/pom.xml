@@ -38,7 +38,7 @@
     <module>protobuf</module>
     <module>sorter</module>
     <module>dsl-xml</module>
-
+    <module>dsl-examples</module>
   </modules>
 
 </project>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FlowDefinition xmlns="http://beam.apache.org/beamflow">
+	<inputs>
+
+		<input name="txtInput" uri="gs://apache-beam-samples/shakespeare/*">
+			<attributes>
+				<attribute name="format" value="txt" />
+			</attributes>
+
+		</input>
+	</inputs>
+	<outputs>
+		<output name="txtOutput" uri="file://tmp/count/myFile">
+			<attributes>
+				<attribute name="file.header" value="col1,col2" />
+				<attribute name="file.footer" value="-------------------------------------" />
+				<attribute name="num.shards" value="3" />
+				<attribute name="file.suffix" value="csv" />
+				<attribute name="file.windowed.writes" value="false" />
+			</attributes>
+		</output>
+
+	</outputs>
+
+	<steps>
+
+		<step name="ExtractWords" type="ParDo">
+			<handler.class>org.apache.beam.sdk.extensions.dsls.xml.example.wordcount.ExtractWordsFn</handler.class>
+		</step>
+		<step name="CountWords" type="Composite">
+			<handler.class>org.apache.beam.sdk.extensions.dsls.xml.example.wordcount.CountWords</handler.class>
+		</step>
+		<step name="MapWords" type="Map">
+			<handler.class>org.apache.beam.sdk.extensions.dsls.xml.example.wordcount.FormatAsTextFn</handler.class>
+
+		</step>
+	</steps>
+	<pipeline>
+
+		<from streams="txtInput" />
+		<to apply="ExtractWords" />
+		<to apply="CountWords" />
+		<to apply="MapWords" />
+		<to apply="txtOutput" />
+	</pipeline>
+</FlowDefinition>

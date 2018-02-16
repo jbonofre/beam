@@ -20,8 +20,8 @@
 		<version>2.1.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<artifactId>beam-sdks-java-extensions-dsl-xml</artifactId>
-	<name>Apache Beam :: SDKs :: Java :: Extensions ::  DSLs :: XML</name>
+	<artifactId>beam-sdks-java-extensions-dsl-examples</artifactId>
+	<name>Apache Beam :: SDKs :: Java :: Extensions ::  DSLs :: Examples</name>
 	<description>Beam XML provides a new interface to generate a Beam pipeline using XML DSL</description>
 	<properties>
 		<kafka.clients.version>0.10.1.0</kafka.clients.version>
@@ -347,72 +347,15 @@
 		</dependency>
 
 
+		
+		
 		<dependency>
 			<groupId>org.apache.beam</groupId>
-			<artifactId>beam-sdks-java-io-kafka</artifactId>
+			<artifactId>beam-sdks-java-extensions-dsl-xml</artifactId>
+			 <version>${project.version}</version>
+			 <scope>runtime</scope>
+			 
 		</dependency>
-		<dependency>
-			<groupId>org.apache.beam</groupId>
-			<artifactId>beam-sdks-java-extensions-google-cloud-platform-core</artifactId>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.beam</groupId>
-			<artifactId>beam-sdks-java-io-google-cloud-platform</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.api-client</groupId>
-			<artifactId>google-api-client</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.beam</groupId>
-			<artifactId>beam-runners-direct-java</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.kafka</groupId>
-			<artifactId>kafka-clients</artifactId>
-			<version>${kafka.clients.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.11</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.code.findbugs</groupId>
-			<artifactId>jsr305</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.google.auto.service</groupId>
-			<artifactId>auto-service</artifactId>
-			<optional>true</optional>
-		</dependency>
-
 
 
 		<!-- test -->
@@ -434,74 +377,10 @@
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.jvnet.jaxb2_commons</groupId>
-			<artifactId>jaxb2-basics-runtime</artifactId>
-			<version>0.6.5</version>
-		</dependency>
+		
 	</dependencies>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.jvnet.jaxb2.maven2</groupId>
-				<artifactId>maven-jaxb2-plugin</artifactId>
-				<version>0.12.3</version>
-				<executions>
-					<execution>
-						<id>generate-model-xml-dsl</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<configuration>
-							<schemaDirectory>src/main/resources/</schemaDirectory>
-							<schemaIncludes>
-								<include>beamflow.xsd</include>
-							</schemaIncludes>
-							<bindingDirectory>src/main/resources/</bindingDirectory>
-							<bindingIncludes>
-								<include>global.xjb</include>
-							</bindingIncludes>
-							<generateDirectory>target/generated-sources/dsl-model</generateDirectory>
-							<generatePackage>org.apache.beam.sdk.extensions.dsls.xml.flow.metadata.model</generatePackage>
-							<!-- For including equals,hashcode and toString methods in generated 
-								code -->
-							<plugins>
-								<plugin>
-									<groupId>org.jvnet.jaxb2_commons</groupId>
-									<artifactId>jaxb2-basics</artifactId>
-									<version>0.9.4</version>
-								</plugin>
-							</plugins>
-							<args>
-								<arg>-Xequals</arg>
-								<arg>-XhashCode</arg>
-								<arg>-XtoString</arg>
-							</args>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- For Adding Generated code directory as source folder -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>add-source</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>${basedir}/target/generated-sources/dsl-model/</source>
-							</sources>
-
-
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>

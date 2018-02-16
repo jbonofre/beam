@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://beam.apache.org/beamflow"
+	xmlns="http://www.w3.org/2001/XMLSchema" xmlns:bfl="http://beam.apache.org/beamflow" elementFormDefault="qualified" >
+	<element name="FlowDefinition" type="bfl:FlowDefinitionType">
+	 <annotation>
+	 	<documentation>
+
+		Models the definition of an event processing flow. A flow is a sequence
+		of event processing steps. The sequence can have one or more inputs and one or more outputs.
+		Configuration and invocation attributes can be defined for the flow. These definitions essentially
+		constitute a domain-specific-langauge (DSL) for event processing flows. The DSL can have multiple
+		implementations. These implementations are referred to as 'engines' ('flow-engines' to be more
+		specific). Flow models do not support inheritance.
+
+	 </documentation>
+	 </annotation>
+	</element>
+    <simpleType name="uriType">
+    <restriction base="string">
+   		<pattern value='"[a-z]://[a-z]\w"'></pattern>
+   	</restriction>
+  </simpleType>
+
+  <simpleType name="nameType">
+  	<restriction base="string"></restriction>
+  </simpleType>
+
+
+
+  <complexType name="attributeType">
+        <annotation>
+        	<documentation>
+
+		Data pipeline configuration attributes and values which apply to the entire flow
+ 		definition. These attributes are visible to inputs, outputs and steps.</documentation>
+        </annotation>
+        <attribute name="name" type="string"></attribute>
+  	<attribute name="value" type="string"></attribute>
+  </complexType>
+
+
+
+
+  <complexType name="inputType">
+  	<sequence>
+  		<element name="attributes" type="bfl:attributesType" maxOccurs="1" minOccurs="1"></element>
+  	</sequence>
+  	<attribute name="name" type="string" use="required"></attribute>
+  	<attribute name="uri" type="string" use="required"></attribute>
+  </complexType>
+
+  <complexType name="outputType">
+  	<sequence>
+  		<element name="attributes" type="bfl:attributesType" maxOccurs="1" minOccurs="1"></element>
+  	</sequence>
+  	<attribute name="name" type="string" use="required"></attribute>
+  	<attribute name="uri" type="string" use="required"></attribute>
+  </complexType>
+
+
+    <complexType name="inputsType">
+    	<sequence>
+    		<element name="input" type="bfl:inputType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="outputsType">
+    	<sequence>
+    		<element name="output" type="bfl:outputType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="processing-stepsType">
+    	<sequence>
+    		<element name="step" type="bfl:stepType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="pipelineType">
+    	<sequence>
+    		<element name="attributes" type="bfl:attributesType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+            <element name="from" type="bfl:fromType" maxOccurs="1" minOccurs="1"></element>
+            <element name="to" type="bfl:applyType"
+    			maxOccurs="unbounded" minOccurs="1">
+    		</element>
+    	</sequence>
+    </complexType>
+    
+    <complexType name="stepType">
+    	<sequence>
+    		<element name="handler.class" type="string" maxOccurs="1"
+    			minOccurs="1">
+    		</element>
+    		<element name="attributes" type="bfl:attributesType" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="name" type="string" use="required"></attribute>
+    	<attribute name="type" type="bfl:supportedType"
+    		use="required">
+    	</attribute>
+    	
+    </complexType>
+
+    <complexType name="applyType">
+    	<attribute name="apply" type="string"></attribute>
+    </complexType>
+    <complexType name="FlowDefinitionType">
+    	<annotation></annotation>
+    	<sequence>
+   			<element name="inputs" type="bfl:inputsType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="outputs" type="bfl:outputsType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="steps" type="bfl:processing-stepsType" maxOccurs="1" minOccurs="1"></element>
+    		<element name="pipeline" type="bfl:pipelineType" maxOccurs="1" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="fromType">
+    	<attribute name="streams" type="string"></attribute>
+    </complexType>
+
+    <complexType name="attributesType">
+    	<sequence>
+    		<element name="attribute" type="bfl:attributeType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+
+    <simpleType name="supportedType">
+    	<restriction base="string">
+    		<enumeration value="Create"></enumeration>
+    		<enumeration value="ParDo"></enumeration>
+    		<enumeration value="Count"></enumeration>
+    		<enumeration value="Map"></enumeration>
+    		<enumeration value="GroupBy"></enumeration>
+    		<enumeration value="Combine"></enumeration>
+    		<enumeration value="Composite"></enumeration>
+    		<enumeration value="Distinct"></enumeration>
+    		<enumeration value="FlatMap"></enumeration>
+    		<enumeration value="Window"></enumeration>
+    		<enumeration value="Any"></enumeration>
+    		
+    	</restriction>
+    </simpleType>
+</schema>

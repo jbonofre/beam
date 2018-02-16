@@ -19,24 +19,7 @@
 
 # Example Pipelines- DSL Declarative API
 
-The examples included in this module serve to demonstrate the basic
+The examples included in dsl-examples module serve to demonstrate the basic
 functionality of Apache Beam, and act as starting points for
 the development of more complex pipelines.
 
-## Word Count
-
-Few examples using Apache Beam Declarative API.
-
-1. [`WordCount`]is the simplest word count pipeline and introduces basic beam DSL https://github.com/jbonofre/beam/blob/DSL_XML/dsls/xml/src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml
-
-## Running Examples
-
-#### How to run the example with DSL
-##### Run with direct runner
- mvn compile exec:java -Dexec.mainClass=org.apache.beam.sdk.extensions.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml**" -Pdirect-runner
-##### Run with Spark runner
- mvn compile exec:java -Dexec.mainClass=org.apache.beam.sdk.extensions.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pspark-runner
-##### Run with Flink runner 
- mvn compile exec:java -Dexec.mainClass=org.apache.beam.sdk.extensions.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Pflink-runner
-##### Run with Apex runner 
- mvn compile exec:java -Dexec.mainClass=org.apache.beam.sdk.extensions.dsls.xml.flow.loader.BeamFlowDSLRunner -Dexec.args="--dslXml=**src/main/java/org/apache/beam/dsls/xml/example/wordcount/BeamFlow-File-in-File-out.xml** " -Papex-runner
