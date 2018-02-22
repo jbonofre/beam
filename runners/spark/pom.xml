@@ -132,17 +132,17 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.11</artifactId>
+      <artifactId>spark-core_2.10</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-streaming_2.11</artifactId>
+      <artifactId>spark-streaming_2.10</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
-      <artifactId>spark-network-common_2.11</artifactId>
+      <artifactId>spark-network-common_2.10</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -197,7 +197,7 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-scala_2.11</artifactId>
+      <artifactId>jackson-module-scala_2.10</artifactId>
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
@@ -242,7 +242,7 @@
     <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
-      <version>2.11.8</version>
+      <version>2.10.1</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -301,7 +301,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka_2.11</artifactId>
+      <artifactId>kafka_2.10</artifactId>
       <version>${kafka.clients.version}</version>
       <scope>test</scope>
       <exclusions>
@@ -427,7 +427,7 @@
         <configuration>
           <ignoredUnusedDeclaredDependencies>
             <ignoredUnusedDeclaredDependency>
-              com.fasterxml.jackson.module:jackson-module-scala_2.11
+              com.fasterxml.jackson.module:jackson-module-scala_2.10
             </ignoredUnusedDeclaredDependency>
           </ignoredUnusedDeclaredDependencies>
         </configuration>

@@ -806,7 +806,7 @@
 
       <dependency>
         <groupId>org.apache.beam</groupId>
-        <artifactId>beam-runners-flink_2.11</artifactId>
+        <artifactId>beam-runners-flink_2.10</artifactId>
         <version>${project.version}</version>
       </dependency>
 
@@ -1290,7 +1290,7 @@
       </dependency>
       <dependency>
         <groupId>com.fasterxml.jackson.module</groupId>
-        <artifactId>jackson-module-scala_2.11</artifactId>
+        <artifactId>jackson-module-scala_2.10</artifactId>
         <version>${jackson.version}</version>
       </dependency>
 
@@ -1381,19 +1381,19 @@
 
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-core_2.11</artifactId>
+        <artifactId>spark-core_2.10</artifactId>
         <version>${spark.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-streaming_2.11</artifactId>
+        <artifactId>spark-streaming_2.10</artifactId>
         <version>${spark.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.apache.spark</groupId>
-        <artifactId>spark-network-common_2.11</artifactId>
+        <artifactId>spark-network-common_2.10</artifactId>
         <version>${spark.version}</version>
       </dependency>
 
