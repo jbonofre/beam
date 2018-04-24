@@ -303,6 +303,7 @@ public class ParquetIO {
       abstract Builder setSchema(Schema schema);
       abstract ReadFiles build();
     }
+
     /**
      * Define the Avro schema of the record to read from the Parquet file.
      */
