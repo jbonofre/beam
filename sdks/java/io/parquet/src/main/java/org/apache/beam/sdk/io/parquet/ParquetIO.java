@@ -21,7 +21,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.hadoop.crypto.key.kms.KMSClientProvider.checkNotNull;
 
 import com.google.auto.value.AutoValue;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 import javax.annotation.Nullable;
+
+import com.google.common.base.Preconditions;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.beam.sdk.annotations.Experimental;
@@ -42,8 +49,11 @@ import org.apache.beam.sdk.values.PDone;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.io.OutputFile;
+import org.apache.parquet.io.PositionOutputStream;
 import org.joda.time.Duration;
 
 /**
@@ -403,7 +413,8 @@ public class ParquetIO {
       public void setup() throws Exception {
         Path path = new Path(spec.path());
         Schema schema = new Schema.Parser().parse(spec.schema());
-        writer = AvroParquetWriter.<GenericRecord>builder(path).withSchema(schema).build();
+        writer = AvroParquetWriter.<GenericRecord>builder(path).withSchema(schema).withWriteMode(
+          ParquetFileWriter.Mode.OVERWRITE).build();
       }
 
       @ProcessElement
@@ -418,7 +429,97 @@ public class ParquetIO {
       }
 
     }
-
   }
 
+  /**
+   * Creates a {@link Sink} that, for use with {@link
+   * FileIO#write}.
+   */
+  public static Sink sink(Schema schema) {
+    return new AutoValue_ParquetIO_Sink.Builder()
+      .setJsonSchema(schema.toString())
+      .build();
+  }
+
+  /** Implementation of {@link #sink}. */
+  @AutoValue
+  public abstract static class Sink implements FileIO.Sink<GenericRecord> {
+
+    abstract String getJsonSchema();
+
+    abstract Builder toBuilder();
+
+    @AutoValue.Builder
+    abstract static class Builder {
+      abstract Builder setJsonSchema(String jsonSchema);
+      abstract Sink build();
+    }
+
+    @Nullable private transient ParquetWriter<GenericRecord> writer;
+
+    @Nullable private transient Schema schema;
+
+    @Override
+    public void open(WritableByteChannel channel) throws IOException {
+      this.schema = new Schema.Parser().parse(getJsonSchema());
+
+      BeamParquetOutputFile beamParquetOutputFile =
+        new BeamParquetOutputFile(Channels.newOutputStream(channel));
+
+      this.writer = AvroParquetWriter.<GenericRecord>builder(beamParquetOutputFile)
+        .withSchema(schema)
+        .build();
+    }
+
+    @Override
+    public void write(GenericRecord element) throws IOException {
+      Preconditions.checkNotNull(writer, "Writer cannot be null");
+      writer.write(element);
+    }
+
+    @Override
+    public void flush() throws IOException {
+      writer.close();
+    }
+
+    private class BeamParquetOutputFile implements OutputFile {
+
+      private OutputStream outputStream;
+
+      private long position = 0;
+
+      BeamParquetOutputFile(OutputStream outputStream) {
+        this.outputStream = outputStream;
+      }
+
+      @Override public PositionOutputStream create(long blockSizeHint) throws IOException {
+        return new PositionOutputStream() {
+
+          @Override public long getPos() throws IOException {
+            return position;
+          }
+
+          @Override public void write(int b) throws IOException {
+            position++;
+            outputStream.write(b);
+          }
+        };
+      }
+
+      @Override public PositionOutputStream createOrOverwrite(long blockSizeHint) {
+        return null;
+      }
+
+      @Override public boolean supportsBlockSize() {
+        return false;
+      }
+
+      @Override public long defaultBlockSize() {
+        return 0;
+      }
+    }
+  }
+
+  /** Disallow construction of utility class. */
+  private ParquetIO() {}
 }

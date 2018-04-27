@@ -26,6 +26,7 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.beam.sdk.coders.AvroCoder;
+import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.testing.PAssert;
 import org.apache.beam.sdk.testing.TestPipeline;
 import org.apache.beam.sdk.transforms.Count;
@@ -40,7 +41,6 @@ import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -110,18 +110,18 @@ public class ParquetIOTest implements Serializable {
     pipeline.run();
   }
 
-  @Ignore
   @Test
   public void testWrite() throws Exception {
     File file = temporaryFolder.newFile("testwrite.parquet");
     file.delete();
+    String path = file.getPath();
 
     Schema schema = new Schema.Parser().parse("{\"type\":\"record\", \"name\":\"testrecord\","
-        + "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
+      + "\"fields\":[{\"name\":\"name\",\"type\":\"string\"}]}");
 
     ArrayList<GenericRecord> data = new ArrayList<>();
-    String[] scientists = {"Einstein", "Darwin", "Copernicus", "Pasteur", "Curie", "Faraday",
-        "Newton", "Bohr", "Galilei", "Maxwell"};
+    String[] scientists = { "Einstein", "Darwin", "Copernicus", "Pasteur", "Curie", "Faraday",
+      "Newton", "Bohr", "Galilei", "Maxwell" };
 
     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 
@@ -131,15 +131,17 @@ public class ParquetIOTest implements Serializable {
       data.add(record);
     }
 
-    pipeline.apply(Create.of(data).withCoder(AvroCoder.of(schema)))
-        .apply(ParquetIO.write().withPath(file.toString()).withSchema(schema.toString()));
+    pipeline
+      .apply(Create.of(data).withCoder(AvroCoder.of(schema)))
+      .apply(FileIO.<GenericRecord>
+        write()
+        .to(path)
+        .via(ParquetIO.sink(schema)));
 
-    pipeline.run();
-
-    Path path = new Path(file.toString());
+    pipeline.run().waitUntilFinish();
 
     int count = 0;
-    ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(path).build();
+    ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(new Path(path)).build();
     GenericRecord record;
     while ((record = reader.read()) != null) {
       System.out.println(record.get("name"));
@@ -148,5 +150,4 @@ public class ParquetIOTest implements Serializable {
 
     assertEquals(1000, count);
   }
-
 }
