@@ -320,6 +320,7 @@ class BeamModulePlugin implements Plugin<Project> {
     def hadoop_version = "2.7.3"
     def jackson_version = "2.9.5"
     def spark_version = "2.3.2"
+    def spark_structured_streaming_version = "2.4.0"
     def apex_core_version = "3.7.0"
     def apex_malhar_version = "3.4.0"
     def postgres_version = "42.2.2"
@@ -430,6 +431,7 @@ class BeamModulePlugin implements Plugin<Project> {
         slf4j_jdk14                                 : "org.slf4j:slf4j-jdk14:1.7.25",
         slf4j_log4j12                               : "org.slf4j:slf4j-log4j12:1.7.25",
         snappy_java                                 : "org.xerial.snappy:snappy-java:1.1.4",
+        spark_sql                                   : "org.apache.spark:spark-core_2.11:$spark_structured_streaming_version",
         spark_core                                  : "org.apache.spark:spark-core_2.11:$spark_version",
         spark_network_common                        : "org.apache.spark:spark-network-common_2.11:$spark_version",
         spark_streaming                             : "org.apache.spark:spark-streaming_2.11:$spark_version",
